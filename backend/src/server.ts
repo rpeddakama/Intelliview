@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import apiRoutes from "./routes/api";
 import authRoutes from "./routes/auth";
+import uploadRoutes from "./routes/upload";
 var cors = require("cors");
 
 dotenv.config();
@@ -28,6 +29,7 @@ mongoose
 // Routes
 app.use("/api", apiRoutes);
 app.use("/auth", authRoutes);
+app.use("/upload", uploadRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

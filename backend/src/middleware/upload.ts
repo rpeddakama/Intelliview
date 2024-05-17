@@ -1,0 +1,31 @@
+import multer from "multer";
+import path from "path";
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const fileFilter = (req: any, file: any, cb: any) => {
+  const fileTypes = /wav|mp3|m4a/;
+  const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = fileTypes.test(file.mimetype);
+
+  if (extname && mimetype) {
+    return cb(null, true);
+  } else {
+    cb("Error: Audio files only!");
+  }
+};
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 10000000 }, // 10MB
+  fileFilter,
+});
+
+export default upload;
