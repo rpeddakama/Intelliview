@@ -13,12 +13,14 @@ const storage = multer.diskStorage({
 const fileFilter = (req: any, file: any, cb: any) => {
   const fileTypes = /wav|mp3|m4a/;
   const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = fileTypes.test(file.mimetype);
+  const mimetype = /audio\/mpeg|audio\/wav|audio\/x-m4a|audio\/m4a/.test(
+    file.mimetype
+  );
 
   if (extname && mimetype) {
     return cb(null, true);
   } else {
-    cb("Error: Audio files only!");
+    cb(new Error("Error: Audio files only!"));
   }
 };
 
