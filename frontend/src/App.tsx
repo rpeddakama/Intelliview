@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Login from './components/Login';
+import Register from './components/Register';
 
 const App: React.FC = () => {
-  const [message, setMessage] = useState<string>('');
-
-  useEffect(() => {
-    axios.get('/api/message')
-      .then(response => setMessage(response.data))
-      .catch(error => console.error('Error fetching data:', error));
-  }, []);
-
   return (
-    <div>
-      <h1>Interview Analysis Service</h1>
-      <p>{message}</p>
-    </div>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" Component={Login} />
+          <Route path="/register" Component={Register} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 
