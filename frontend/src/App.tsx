@@ -1,21 +1,39 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import Login from "./components/Login";
-import Register from "./components/Register";
-import Upload from "./components/Upload";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import MainSection from "./components/MainSection";
+import Footer from "./components/Footer";
+import About from "./components/About";
+import Services from "./components/Services";
+import Contact from "./components/Contact";
+import { CssBaseline } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+const theme = createTheme();
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Router>
-        <Routes>
-          <Route path="/login" Component={Login} />
-          <Route path="/register" Component={Register} />
-          <Route path="/upload" Component={Upload} />
-        </Routes>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
+          }}
+        >
+          <Header />
+          <Routes>
+            <Route path="/" element={<MainSection />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+          <Footer />
+        </div>
       </Router>
-    </AuthProvider>
+    </ThemeProvider>
   );
 };
 

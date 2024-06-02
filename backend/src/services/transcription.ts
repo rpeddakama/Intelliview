@@ -7,18 +7,24 @@ const transcribeAudio = async (filePath: string): Promise<string> => {
   form.append("file", fs.createReadStream(filePath));
   form.append("model", "whisper-1");
 
-  const response = await axios.post(
-    "https://api.openai.com/v1/audio/transcriptions",
-    form,
-    {
-      headers: {
-        ...form.getHeaders(),
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-    }
-  );
-
-  return response.data.text;
+  console.log("AT TRANSCRIPTION SERVICE");
+  // console.log(form);
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/audio/transcriptions",
+      form,
+      {
+        headers: {
+          ...form.getHeaders(),
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      }
+    );
+    return response.data.text;
+  } catch (error) {
+    console.log("API ERROR", error);
+  }
+  return "a";
 };
 
 export default transcribeAudio;
