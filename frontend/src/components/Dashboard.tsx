@@ -4,26 +4,26 @@ import { styled } from "@mui/material/styles";
 
 const DashboardContainer = styled(Container)`
   padding: 20px;
-  background-color: #121212; // Adjust based on your theme
-  color: #ffffff; // Adjust based on your theme
+  background-color: #121212;
+  color: #ffffff;
 `;
 
 const FeatureBox = styled(Box)`
   padding: 20px;
   margin: 10px;
-  background-color: #1e1e1e; // Adjust based on your theme
+  background-color: #1e1e1e;
   border-radius: 8px;
   text-align: center;
   cursor: pointer;
   &:hover {
-    background-color: #2c2c2c; // Adjust based on your theme
+    background-color: #2c2c2c;
   }
 `;
 
 const NotesBox = styled(Box)`
   padding: 20px;
   margin: 10px 0;
-  background-color: #1e1e1e; // Adjust based on your theme
+  background-color: #1e1e1e;
   border-radius: 8px;
 `;
 

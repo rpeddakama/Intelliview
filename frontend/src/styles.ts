@@ -34,7 +34,6 @@ export const MainContainer = styled(Container)`
   align-items: center;
   padding: 50px 20px;
   text-align: center;
-  background-color: ${backgroundColor};
 `;
 
 export const Title = styled(Typography)`
