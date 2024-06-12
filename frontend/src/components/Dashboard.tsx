@@ -1,71 +1,122 @@
+// Dashboard.tsx
 import React from "react";
-import { Container, Typography, Grid, Box } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Container,
+  Grid,
+  Paper,
+  Box,
+  Button,
+} from "@mui/material";
+import { styled } from "@mui/system";
 
-const DashboardContainer = styled(Container)`
-  padding: 20px;
-  background-color: #121212;
-  color: #ffffff;
-`;
+const Root = styled("div")({
+  flexGrow: 1,
+});
 
-const FeatureBox = styled(Box)`
-  padding: 20px;
-  margin: 10px;
-  background-color: #1e1e1e;
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  &:hover {
-    background-color: #2c2c2c;
-  }
-`;
+const AppBarStyled = styled(AppBar)({
+  backgroundColor: "#2C3E50",
+});
 
-const NotesBox = styled(Box)`
-  padding: 20px;
-  margin: 10px 0;
-  background-color: #1e1e1e;
-  border-radius: 8px;
-`;
+const Title = styled(Typography)({
+  flexGrow: 1,
+});
+
+const MainContainer = styled(Container)(({ theme }) => ({
+  marginTop: theme.spacing(4),
+}));
+
+const PaperStyled = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  textAlign: "center",
+  color: theme.palette.text.secondary,
+}));
+
+const CardContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 16, // Use fixed spacing value
+});
 
 const Dashboard: React.FC = () => {
   return (
-    <DashboardContainer>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
-      <Typography variant="subtitle1" gutterBottom>
-        Create new notes
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={4}>
-          <FeatureBox>
-            <Typography variant="h6">Record or Upload Audio</Typography>
-            <Typography variant="body2">Upload an audio file</Typography>
-          </FeatureBox>
+    <Root>
+      <AppBarStyled position="static">
+        <Toolbar>
+          <Title variant="h6">MyApp</Title>
+          <Button color="inherit">Login</Button>
+        </Toolbar>
+      </AppBarStyled>
+      <MainContainer>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <PaperStyled>
+              <Typography variant="h5">
+                Welcome to the HackerRank Dashboard
+              </Typography>
+              <Typography variant="body1">
+                Practice coding, prepare for interviews, and get hired.
+              </Typography>
+            </PaperStyled>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <PaperStyled>
+              <CardContainer>
+                <Typography variant="h6">Practice</Typography>
+                <Button variant="contained" color="primary">
+                  Start
+                </Button>
+              </CardContainer>
+              <Typography variant="body2">
+                Improve your coding skills by solving practice problems.
+              </Typography>
+            </PaperStyled>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <PaperStyled>
+              <CardContainer>
+                <Typography variant="h6">Contests</Typography>
+                <Button variant="contained" color="primary">
+                  Participate
+                </Button>
+              </CardContainer>
+              <Typography variant="body2">
+                Join coding contests and challenge yourself.
+              </Typography>
+            </PaperStyled>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <PaperStyled>
+              <CardContainer>
+                <Typography variant="h6">Interview Preparation</Typography>
+                <Button variant="contained" color="primary">
+                  Prepare
+                </Button>
+              </CardContainer>
+              <Typography variant="body2">
+                Get ready for your next technical interview.
+              </Typography>
+            </PaperStyled>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <PaperStyled>
+              <CardContainer>
+                <Typography variant="h6">Job Offers</Typography>
+                <Button variant="contained" color="primary">
+                  Explore
+                </Button>
+              </CardContainer>
+              <Typography variant="body2">
+                Find your next job opportunity.
+              </Typography>
+            </PaperStyled>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <FeatureBox>
-            <Typography variant="h6">YouTube Video</Typography>
-            <Typography variant="body2">Paste a YouTube link</Typography>
-          </FeatureBox>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <FeatureBox>
-            <Typography variant="h6">PDF Upload</Typography>
-            <Typography variant="body2">Upload a PDF file</Typography>
-          </FeatureBox>
-        </Grid>
-      </Grid>
-      <Typography variant="h5" gutterBottom>
-        All Notes
-      </Typography>
-      <NotesBox>
-        <Typography variant="h6">
-          Combining and Compositing Functions
-        </Typography>
-        <Typography variant="body2">Created on Friday, May 31st</Typography>
-      </NotesBox>
-    </DashboardContainer>
+      </MainContainer>
+    </Root>
   );
 };
 

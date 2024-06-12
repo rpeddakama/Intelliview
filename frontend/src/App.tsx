@@ -18,20 +18,10 @@ const App: React.FC = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Header />
+        {/* <Header /> */}
         <Routes>
           <Route path="/" element={<MainSection />} />
-          <Route
-            path="dashboard"
-            element={
-              <Box sx={{ display: "flex" }}>
-                <Sidebar />
-                <Box sx={{ flexGrow: 1, p: 3 }}>
-                  <Dashboard />
-                </Box>
-              </Box>
-            }
-          />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="settings" element={<Settings />} />
           <Route path="about" element={<About />} />
           <Route path="services" element={<Services />} />
