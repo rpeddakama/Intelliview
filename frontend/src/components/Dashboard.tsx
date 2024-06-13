@@ -1,5 +1,6 @@
-// Dashboard.tsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   AppBar,
   Toolbar,
@@ -42,12 +43,21 @@ const CardContainer = styled(Box)({
 });
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login"); // Redirect to login page
+  };
   return (
     <Root>
       <AppBarStyled position="static">
         <Toolbar>
           <Title variant="h6">MyApp</Title>
           <Button color="inherit">Login</Button>
+          <Button color="inherit" onClick={handleLogout}>
+            Logout
+          </Button>
         </Toolbar>
       </AppBarStyled>
       <MainContainer>
