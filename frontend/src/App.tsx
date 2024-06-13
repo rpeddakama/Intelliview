@@ -8,6 +8,8 @@ import Settings from "./components/Settings";
 import About from "./components/About";
 import Services from "./components/Services";
 import Contact from "./components/Contact";
+import Login from "./components/Login";
+import Register from "./components/Register";
 import { CssBaseline, Box } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
@@ -26,6 +28,8 @@ const App: React.FC = () => {
           <Route path="about" element={<About />} />
           <Route path="services" element={<Services />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
         </Routes>
       </Router>
     </ThemeProvider>
