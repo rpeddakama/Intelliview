@@ -49,12 +49,19 @@ const Dashboard: React.FC = () => {
     localStorage.removeItem("token");
     navigate("/login"); // Redirect to login page
   };
+
+  const handleProfile = () => {
+    navigate("/profile");
+  };
+
   return (
     <Root>
       <AppBarStyled position="static">
         <Toolbar>
           <Title variant="h6">MyApp</Title>
-          <Button color="inherit">Login</Button>
+          <Button color="inherit" onClick={handleProfile}>
+            Profile
+          </Button>
           <Button color="inherit" onClick={handleLogout}>
             Logout
           </Button>

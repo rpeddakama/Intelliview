@@ -14,6 +14,7 @@ import { CssBaseline, Box } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ProtectedRoutes from "./context/ProtectedRoutes";
 import HelloWorld from "./components/HelloWorld";
+import Profile from "./components/Profile";
 
 const theme = createTheme();
 
@@ -34,6 +35,7 @@ const App: React.FC = () => {
           <Route element={<ProtectedRoutes />}>
             <Route path="/hello-world" element={<HelloWorld />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Routes>
       </Router>

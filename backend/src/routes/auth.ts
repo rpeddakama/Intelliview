@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User, { IUser } from "../models/User";
@@ -52,5 +52,40 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    console.log("No token provided");
+    return res.sendStatus(401);
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET as string, (err, user) => {
+    if (err) {
+      console.log("Token verification failed:", err);
+      return res.sendStatus(403);
+    }
+    (req as any).user = user;
+    next();
+  });
+};
+
+// Profile route
+router.get(
+  "/profile",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user.userId;
+      const user = await User.findById(userId).select("-password"); // Exclude password field
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
 
 export default router;
