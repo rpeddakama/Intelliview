@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import axiosInstance from "../axiosConfig";
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
   email: string;
@@ -11,6 +12,7 @@ const Profile: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -28,15 +30,22 @@ const Profile: React.FC = () => {
 
         setProfile(response.data);
         setLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch profile", err);
-        setError("Failed to fetch profile");
+      } catch (err: any) {
+        if (
+          err.response &&
+          (err.response.status === 403 || err.response.status === 401)
+        ) {
+          setError("Session expired. Please log in again.");
+          navigate("/login");
+        } else {
+          setError("Failed to fetch profile");
+        }
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return <div>Loading...</div>;
