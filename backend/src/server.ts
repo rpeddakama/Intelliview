@@ -4,8 +4,6 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import apiRoutes from "./routes/api";
 import authRoutes from "./routes/auth";
-import uploadRoutes from "./routes/upload";
-import transcriptionRoutes from "./routes/transcription";
 import path from "path";
 import fs from "fs";
 
@@ -42,8 +40,6 @@ mongoose
 // Routes
 app.use("/api", apiRoutes);
 app.use("/auth", authRoutes);
-app.use("/upload", uploadRoutes);
-app.use("/transcription", transcriptionRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

@@ -15,6 +15,8 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ProtectedRoutes from "./context/ProtectedRoutes";
 import HelloWorld from "./components/HelloWorld";
 import Profile from "./components/Profile";
+import Upload from "./components/Upload";
+import Recorder from "./components/Recorder";
 
 const theme = createTheme();
 
@@ -32,10 +34,12 @@ const App: React.FC = () => {
           <Route path="contact" element={<Contact />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="upload" element={<Upload />} />
           <Route element={<ProtectedRoutes />}>
             <Route path="/hello-world" element={<HelloWorld />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="recorder" element={<Recorder />} />
           </Route>
         </Routes>
       </Router>

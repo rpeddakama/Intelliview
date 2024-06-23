@@ -1,115 +1,42 @@
-// import React, { useState } from "react";
-// import axiosInstance from "../axiosConfig";
-
-// const Upload: React.FC = () => {
-//   const [file, setFile] = useState<File | null>(null);
-//   const [transcription, setTranscription] = useState<string>("");
-
-//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (e.target.files) {
-//       setFile(e.target.files[0]);
-//     }
-//   };
-
-//   const handleUpload = async () => {
-//     if (!file) {
-//       return;
-//     }
-
-//     const formData = new FormData();
-//     formData.append("audio", file);
-
-//     try {
-//       console.log("HERE BEFORE UPLOAD REACT");
-//       const uploadResponse = await axiosInstance.post(
-//         "/upload/upload",
-//         formData,
-//         {
-//           headers: {
-//             "Content-Type": "multipart/form-data",
-//           },
-//         }
-//       );
-
-//       console.log("HERE BEFORE TRANSCRIPTION");
-//       const transcriptionResponse = await axiosInstance.post(
-//         "/transcription/transcribe",
-//         {
-//           filePath: uploadResponse.data.filePath,
-//         }
-//       );
-
-//       setTranscription(transcriptionResponse.data.transcription);
-//     } catch (error) {
-//       console.error("Error uploading and transcribing file:", error);
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2>Upload and Transcribe Audio</h2>
-//       <input type="file" accept="audio/*" onChange={handleFileChange} />
-//       <button onClick={handleUpload}>Upload and Transcribe</button>
-//       {transcription && (
-//         <div>
-//           <h3>Transcription</h3>
-//           <p>{transcription}</p>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Upload;
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import axiosInstance from "../axiosConfig";
 
 const Upload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [transcription, setTranscription] = useState<string>("");
+  const [feedback, setFeedback] = useState<string>("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
     }
   };
 
-  const handleUpload = async () => {
-    if (!file) {
-      return;
-    }
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!file) return;
 
     const formData = new FormData();
     formData.append("audio", file);
 
     try {
-      const uploadResponse = await axios.post(
-        "/transcription/transcribe",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setTranscription(uploadResponse.data.transcription);
+      const response = await axiosInstance.post("/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setFeedback(response.data.feedback);
     } catch (error) {
-      console.error("Error uploading and transcribing file:", error);
+      console.error("Error uploading file:", error);
     }
   };
 
   return (
     <div>
-      <h2>Upload and Transcribe Audio</h2>
-      <input type="file" accept="audio/*" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload and Transcribe</button>
-      {transcription && (
-        <div>
-          <h3>Transcription</h3>
-          <p>{transcription}</p>
-        </div>
-      )}
+      <form onSubmit={handleSubmit}>
+        <input type="file" accept="audio/*" onChange={handleFileChange} />
+        <button type="submit">Upload</button>
+      </form>
+      {feedback && <div>{feedback}</div>}
     </div>
   );
 };

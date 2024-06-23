@@ -36,6 +36,7 @@ const Profile: React.FC = () => {
           (err.response.status === 403 || err.response.status === 401)
         ) {
           setError("Session expired. Please log in again.");
+          localStorage.removeItem("token");
           navigate("/login");
         } else {
           setError("Failed to fetch profile");
