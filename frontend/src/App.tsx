@@ -16,6 +16,7 @@ import HelloWorld from "./components/HelloWorld";
 import Profile from "./components/Profile";
 import Upload from "./components/Upload";
 import Recorder from "./components/Recorder";
+import PastSessions from "./components/PastSessions";
 
 const App: React.FC = () => {
   return (
@@ -35,6 +36,7 @@ const App: React.FC = () => {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="recorder" element={<Recorder />} />
+          <Route path="past-sessions" element={<PastSessions />} />
         </Route>
       </Routes>
     </Router>

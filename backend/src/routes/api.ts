@@ -134,4 +134,23 @@ router.post(
   }
 );
 
+import { Request, Response } from "express";
+
+router.get(
+  "/recordings",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const userProfile = await User.findById(user._id).populate("recordings");
+      if (!userProfile) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(userProfile.recordings);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
 export default router;
