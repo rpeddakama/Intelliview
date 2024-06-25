@@ -4,7 +4,7 @@ import { IRecording } from "./Recording";
 export interface IUser extends Document {
   email: string;
   password: string;
-  recordings: IRecording[];
+  recordings: IRecording["_id"][];
 }
 
 const UserSchema: Schema = new Schema({

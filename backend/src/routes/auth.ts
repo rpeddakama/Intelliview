@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from "express";
+import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User, { IUser } from "../models/User";
@@ -8,6 +8,7 @@ const router = Router();
 
 // Register
 router.post("/register", async (req, res) => {
+  console.log("hello registering person");
   const { email, password } = req.body;
 
   try {
@@ -59,12 +60,12 @@ router.get(
   authenticateToken,
   async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).user.userId;
-      const user = await User.findById(userId).select("-password"); // Exclude password field
-      if (!user) {
+      const user = (req as any).user;
+      const userProfile = await User.findById(user._id).select("-password"); // Exclude password field
+      if (!userProfile) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json(user);
+      res.json(userProfile);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
     }
