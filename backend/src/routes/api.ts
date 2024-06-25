@@ -50,31 +50,53 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       return res.status(400).send("Invalid file type");
     }
 
-    const formData = new FormData();
-    formData.append("file", req.file.buffer, {
+    // Transcription Step
+    const transcriptionFormData = new FormData();
+    transcriptionFormData.append("file", req.file.buffer, {
       filename: req.file.originalname,
       contentType: req.file.mimetype,
     });
-    formData.append("model", "whisper-1");
+    transcriptionFormData.append("model", "whisper-1");
 
-    const axiosConfig = {
+    const transcriptionConfig = {
       method: "post",
       url: "https://api.openai.com/v1/audio/transcriptions",
       headers: {
-        ...formData.getHeaders(),
+        ...transcriptionFormData.getHeaders(),
         Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
       },
-      data: formData,
+      data: transcriptionFormData,
     };
 
-    console.log("AT TRANSCRIBE WOOOOOOOOOOOOOOOO");
-    try {
-      const response = await axios(axiosConfig);
-      console.log(response.data);
-      res.json({ transcription: response.data });
-    } catch (error) {
-      console.log("ERROR OCCURED DURING POST REQUEST", error);
-    }
+    const transcriptionResponse = await axios(transcriptionConfig);
+    const transcription = transcriptionResponse.data;
+
+    const analysisPrompt = `
+      Analyze the following transcription of a response to the following behavioral
+      interview question ${req.body.question}. Assess the quality of the response, including the clarity, relevance,
+      and completeness of the answer:\n\n${transcription.text}`;
+
+    const analysisConfig = {
+      method: "post",
+      url: "https://api.openai.com/v1/chat/completions",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
+      },
+      data: JSON.stringify({
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: analysisPrompt },
+        ],
+        max_tokens: 500,
+      }),
+    };
+    const analysisResponse = await axios(analysisConfig);
+    console.log(analysisResponse.data.choices[0].message.content);
+    const analysis = analysisResponse.data.choices[0].message.content;
+
+    res.json({ transcription: transcription, analysis: analysis });
   } catch (error) {
     console.error("Error processing audio file:", error);
     res.status(500).send("Error processing audio file");
