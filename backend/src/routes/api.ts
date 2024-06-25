@@ -1,8 +1,18 @@
-import { Router } from "express";
-import authenticateToken from "../middleware/auth";
-import Note from "../models/Note";
+import { Router, Request, Response } from "express";
+import axios from "axios";
+import mongoose from "mongoose";
+import multer from "multer";
+import FormData from "form-data";
 
+import authenticateToken from "../middleware/auth";
+import dotenv from "dotenv";
+import Note from "../models/Note";
+import Recording from "../models/Recording";
+import User from "../models/User";
+
+const upload = multer();
 const router = Router();
+dotenv.config();
 
 // Define routes
 router.get("/message", (req, res) => {
@@ -26,20 +36,6 @@ router.post("/notes", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
-import multer from "multer";
-const upload = multer();
-import path from "path";
-import fs from "fs";
-import axios from "axios";
-import FormData from "form-data";
-import dotenv from "dotenv";
-
-import Recording from "../models/Recording";
-import User from "../models/User";
-import mongoose from "mongoose";
-
-dotenv.config();
 
 router.post(
   "/transcribe",
@@ -133,8 +129,6 @@ router.post(
     }
   }
 );
-
-import { Request, Response } from "express";
 
 router.get(
   "/recordings",

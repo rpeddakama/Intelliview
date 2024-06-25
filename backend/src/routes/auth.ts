@@ -6,7 +6,6 @@ import authenticateToken from "../middleware/auth";
 
 const router = Router();
 
-// Register
 router.post("/register", async (req, res) => {
   const { email, password } = req.body;
 
@@ -27,7 +26,6 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 

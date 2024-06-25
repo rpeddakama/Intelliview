@@ -1,4 +1,3 @@
-// backend/src/server.ts
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -8,25 +7,12 @@ import path from "path";
 import fs from "fs";
 
 var cors = require("cors");
-
 dotenv.config();
 
 const app = express();
-
-// Middleware
 app.use(express.json());
 app.use(cors());
 
-// Ensure the uploads directory exists
-const uploadsDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Serve static files from the uploads directory
-app.use("/uploads", express.static(uploadsDir));
-
-// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI as string)
   .then(() => {
@@ -37,7 +23,6 @@ mongoose
     console.error("MongoDB connection error:", error);
   });
 
-// Routes
 app.use("/api", apiRoutes);
 app.use("/auth", authRoutes);
 
