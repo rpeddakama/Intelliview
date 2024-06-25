@@ -1,14 +1,13 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User, { IUser } from "../models/User";
+import User from "../models/User";
 import authenticateToken from "../middleware/auth";
 
 const router = Router();
 
 // Register
 router.post("/register", async (req, res) => {
-  console.log("hello registering person");
   const { email, password } = req.body;
 
   try {

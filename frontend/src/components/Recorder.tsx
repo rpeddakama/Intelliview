@@ -1,4 +1,3 @@
-// src/components/AudioRecorder.tsx
 import React, { useState, useRef } from "react";
 import axiosInstance from "../axiosConfig";
 
@@ -61,7 +60,7 @@ const AudioRecorder: React.FC = () => {
         },
       });
       console.log(response);
-      setTranscription(response.data.transcription.text);
+      setTranscription(response.data.transcription);
       setAnalysis(response.data.analysis);
       setError(null);
     } catch (error) {

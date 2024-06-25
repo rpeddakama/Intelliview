@@ -35,72 +35,103 @@ import axios from "axios";
 import FormData from "form-data";
 import dotenv from "dotenv";
 
+import Recording from "../models/Recording";
+import User from "../models/User";
+import mongoose from "mongoose";
+
 dotenv.config();
 
-router.post("/transcribe", upload.single("audio"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).send("No file uploaded");
+router.post(
+  "/transcribe",
+  authenticateToken,
+  upload.single("audio"),
+  async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      if (!req.file) {
+        return res.status(400).send("No file uploaded");
+      }
+
+      const fileType = req.file.mimetype;
+      if (
+        !["audio/wav", "audio/mpeg", "audio/mp4", "audio/webm"].includes(
+          fileType
+        )
+      ) {
+        return res.status(400).send("Invalid file type");
+      }
+
+      // Transcription Step
+      const transcriptionFormData = new FormData();
+      transcriptionFormData.append("file", req.file.buffer, {
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+      });
+      transcriptionFormData.append("model", "whisper-1");
+
+      const transcriptionConfig = {
+        method: "post",
+        url: "https://api.openai.com/v1/audio/transcriptions",
+        headers: {
+          ...transcriptionFormData.getHeaders(),
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
+        },
+        data: transcriptionFormData,
+      };
+
+      const transcriptionResponse = await axios(transcriptionConfig);
+      const transcription = transcriptionResponse.data;
+
+      const analysisPrompt = `Analyze the following transcription of a response to the following behavioral interview question: ${req.body.question}. Assess the quality of the response, including the clarity, relevance, and completeness of the answer:\n\n${transcription.text}`;
+
+      const analysisConfig = {
+        method: "post",
+        url: "https://api.openai.com/v1/chat/completions",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
+        },
+        data: JSON.stringify({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: analysisPrompt },
+          ],
+          max_tokens: 500,
+        }),
+      };
+
+      const analysisResponse = await axios(analysisConfig);
+      const analysis = analysisResponse.data.choices[0].message.content;
+
+      // Create a new recording
+      const newRecording = new Recording({
+        question: req.body.question,
+        transcription: transcription.text,
+        analysis: analysis,
+        date: new Date(),
+      });
+
+      await newRecording.save({ session });
+
+      // Add the recording to user's profile
+      const user = (req as any).user;
+      user.recordings.push(newRecording._id);
+      await user.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.json({ transcription: transcription.text, analysis: analysis });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error("Error processing audio file:", error);
+      res.status(500).send("Error processing audio file");
     }
-
-    const fileType = req.file.mimetype;
-    if (
-      !["audio/wav", "audio/mpeg", "audio/mp4", "audio/webm"].includes(fileType)
-    ) {
-      return res.status(400).send("Invalid file type");
-    }
-
-    // Transcription Step
-    const transcriptionFormData = new FormData();
-    transcriptionFormData.append("file", req.file.buffer, {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype,
-    });
-    transcriptionFormData.append("model", "whisper-1");
-
-    const transcriptionConfig = {
-      method: "post",
-      url: "https://api.openai.com/v1/audio/transcriptions",
-      headers: {
-        ...transcriptionFormData.getHeaders(),
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
-      },
-      data: transcriptionFormData,
-    };
-
-    const transcriptionResponse = await axios(transcriptionConfig);
-    const transcription = transcriptionResponse.data;
-
-    const analysisPrompt = `
-      Analyze the following transcription of a response to the following behavioral
-      interview question ${req.body.question}. Assess the quality of the response, including the clarity, relevance,
-      and completeness of the answer:\n\n${transcription.text}`;
-
-    const analysisConfig = {
-      method: "post",
-      url: "https://api.openai.com/v1/chat/completions",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
-      },
-      data: JSON.stringify({
-        model: "gpt-4",
-        messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: analysisPrompt },
-        ],
-        max_tokens: 500,
-      }),
-    };
-    const analysisResponse = await axios(analysisConfig);
-    console.log(analysisResponse.data.choices[0].message.content);
-    const analysis = analysisResponse.data.choices[0].message.content;
-
-    res.json({ transcription: transcription, analysis: analysis });
-  } catch (error) {
-    console.error("Error processing audio file:", error);
-    res.status(500).send("Error processing audio file");
   }
-});
+);
 
 export default router;

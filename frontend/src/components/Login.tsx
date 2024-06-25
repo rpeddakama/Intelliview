@@ -17,7 +17,7 @@ const Login: React.FC = () => {
       });
       alert("Login successful");
       localStorage.setItem("token", response.data.token);
-      navigate("/dashboard"); // Redirect to login page
+      navigate("/dashboard"); // Redirect to the dashboard page
     } catch (error) {
       console.error("Error logging in:", error);
       alert("Login failed. Please check your email and password.");
