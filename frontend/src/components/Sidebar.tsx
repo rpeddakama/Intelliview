@@ -1,68 +1,76 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import {
+  Divider,
+  Drawer,
   List,
   ListItem,
-  ListItemText,
   ListItemIcon,
-  Drawer,
+  ListItemText,
   Toolbar,
-  Box,
-  Divider,
+  Typography,
 } from "@mui/material";
-// import DashboardIcon from "@mui/icons-material/Dashboard";
-// import SettingsIcon from "@mui/icons-material/Settings";
-// import UpgradeIcon from "@mui/icons-material/Upgrade";
-import { styled } from "@mui/material/styles";
-
-const drawerWidth = 240;
-
-const SidebarContainer = styled(Box)`
-  width: ${drawerWidth}px;
-  flex-shrink: 0;
-`;
-
-const StyledDrawer = styled(Drawer)`
-  .MuiDrawer-paper {
-    width: ${drawerWidth}px;
-    box-sizing: border-box;
-    background-color: #1f1f1f; // Sidebar background color
-    color: #ffffff; // Sidebar text color
-  }
-`;
+import { Home, Settings, History } from "@mui/icons-material";
 
 const Sidebar: React.FC = () => {
+  const drawerWidth = 240;
+
   return (
-    <SidebarContainer>
-      <StyledDrawer variant="permanent" anchor="left">
-        <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
-          <List>
-            <ListItem button component={Link} to="/dashboard">
-              <ListItemIcon>
-                {/* <DashboardIcon style={{ color: "#FFFFFF" }} /> */}
-              </ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            <ListItem button component={Link} to="/settings">
-              <ListItemIcon>
-                {/* <SettingsIcon style={{ color: "#FFFFFF" }} /> */}
-              </ListItemIcon>
-              <ListItemText primary="Settings" />
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem button>
-              <ListItemIcon>
-                {/* <UpgradeIcon style={{ color: "#FFFFFF" }} /> */}
-              </ListItemIcon>
-              <ListItemText primary="Upgrade to Premium" />
-            </ListItem>
-          </List>
-        </Box>
-      </StyledDrawer>
-    </SidebarContainer>
+    <Drawer
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
+          backgroundColor: "#2E2E2E",
+          color: "white",
+          overflowX: "hidden", // Prevent horizontal scrollbar
+          overflowY: "auto", // Allow vertical scrollbar if needed
+        },
+      }}
+      variant="permanent"
+      anchor="left"
+    >
+      <Toolbar sx={{ display: "flex", justifyContent: "flex-start", pl: 2 }}>
+        <Typography variant="h6" noWrap component="div" sx={{ color: "white" }}>
+          Maxview AI
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <List>
+        {["Home", "Past Sessions", "Settings"].map((text, index) => (
+          <ListItem
+            button
+            key={text}
+            sx={{
+              "&:hover": {
+                backgroundColor: "#444",
+                borderRadius: "10px",
+                "& .MuiListItemIcon-root": {
+                  color: "white",
+                },
+                "& .MuiListItemText-primary": {
+                  color: "white",
+                },
+              },
+              margin: "5px 10px",
+              padding: "10px 20px",
+            }}
+          >
+            <ListItemIcon sx={{ color: "inherit", minWidth: "40px" }}>
+              {index === 0 ? (
+                <Home />
+              ) : index === 1 ? (
+                <History />
+              ) : (
+                <Settings />
+              )}
+            </ListItemIcon>
+            <ListItemText primary={text} sx={{ color: "inherit" }} />
+          </ListItem>
+        ))}
+      </List>
+    </Drawer>
   );
 };
 
