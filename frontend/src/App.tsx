@@ -15,7 +15,6 @@ import Upload from "./components/Upload";
 import Recorder from "./components/Recorder";
 import PastSessions from "./components/PastSessions";
 import TempForm from "./components/tempForm";
-import TempForm2 from "./components/tempForm2";
 
 const App: React.FC = () => {
   return (
@@ -31,7 +30,6 @@ const App: React.FC = () => {
         <Route path="register" element={<Register />} />
         <Route path="upload" element={<Upload />} />
         <Route path="tempform" element={<TempForm />} />
-        <Route path="tempform2" element={<TempForm2 />} />
         <Route element={<ProtectedRoutes />}>
           <Route path="/hello-world" element={<HelloWorld />} />
           <Route path="dashboard" element={<Dashboard />} />
