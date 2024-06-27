@@ -21,8 +21,12 @@ const authenticateToken = async (
 
   try {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
-    const user = await User.findById(decoded.userId);
+    if (decoded.exp < Date.now() / 1000) {
+      console.log("Token expired");
+      return res.sendStatus(403);
+    }
 
+    const user = await User.findById(decoded.userId);
     if (!user) {
       console.log("User not found");
       return res.sendStatus(403);

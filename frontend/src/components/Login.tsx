@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import axiosInstance from "../axiosConfig";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../axiosConfig";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,8 +16,13 @@ const Login: React.FC = () => {
         password,
       });
       alert("Login successful");
-      localStorage.setItem("token", response.data.token);
-      navigate("/dashboard"); // Redirect to the dashboard page
+
+      // Store tokens in local storage
+      localStorage.setItem("accessToken", response.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+
+      // Redirect to the dashboard page
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error logging in:", error);
       alert("Login failed. Please check your email and password.");

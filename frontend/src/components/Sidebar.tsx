@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Home, Settings, History } from "@mui/icons-material";
+import Logout from "./Logout";
 
 const Sidebar: React.FC = () => {
   const drawerWidth = 240;
@@ -69,6 +70,7 @@ const Sidebar: React.FC = () => {
             <ListItemText primary={text} sx={{ color: "inherit" }} />
           </ListItem>
         ))}
+        <Logout />
       </List>
     </Drawer>
   );
