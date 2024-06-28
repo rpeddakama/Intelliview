@@ -9,6 +9,8 @@ import Upload from "./components/Upload";
 import Recorder from "./components/Recorder";
 import PastSessions from "./components/PastSessions";
 import TempForm from "./components/tempForm";
+import TempSessions from "./components/TempSessions";
+import SessionDetail from "./components/SessionDetail";
 
 const App: React.FC = () => {
   return (
@@ -23,6 +25,8 @@ const App: React.FC = () => {
           <Route path="profile" element={<Profile />} />
           <Route path="recorder" element={<Recorder />} />
           <Route path="past-sessions" element={<PastSessions />} />
+          <Route path="temp-sessions" element={<TempSessions />} />
+          <Route path="/session/:id" element={<SessionDetail />} />
         </Route>
       </Routes>
     </Router>

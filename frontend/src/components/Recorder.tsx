@@ -1,26 +1,31 @@
-// TempForm.tsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   CssBaseline,
   Typography,
   Button,
   TextField,
-  IconButton,
+  LinearProgress,
+  CircularProgress,
 } from "@mui/material";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import axiosInstance from "../axiosConfig";
 import Sidebar from "./Sidebar";
+import axiosInstance from "../axiosConfig";
 
 const TempForm: React.FC = () => {
   const [recording, setRecording] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [transcription, setTranscription] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [question, setQuestion] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isRecorded, setIsRecorded] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const maxDuration = 2 * 60 * 1000; // 3 minutes in milliseconds
 
   const startRecording = () => {
     navigator.mediaDevices
@@ -32,7 +37,23 @@ const TempForm: React.FC = () => {
         };
         mediaRecorderRef.current.start();
         setRecording(true);
+        setPaused(false);
         setError(null);
+
+        const startTime = Date.now();
+        intervalRef.current = setInterval(() => {
+          const elapsedTime = Date.now() - startTime;
+          const progress = (elapsedTime / maxDuration) * 100;
+          if (progress >= 100) {
+            clearInterval(intervalRef.current!);
+            setRecording(false);
+            setPaused(false);
+            setProgress(100);
+            stopRecording();
+          } else {
+            setProgress(progress);
+          }
+        }, 1000);
       })
       .catch((error) => {
         console.error("Error accessing microphone:", error);
@@ -40,9 +61,29 @@ const TempForm: React.FC = () => {
       });
   };
 
+  const pauseRecording = () => {
+    mediaRecorderRef.current?.pause();
+    setPaused(true);
+  };
+
+  const resumeRecording = () => {
+    mediaRecorderRef.current?.resume();
+    setPaused(false);
+  };
+
   const stopRecording = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
     mediaRecorderRef.current?.stop();
     setRecording(false);
+    setPaused(false);
+    setIsRecorded(true);
+    setProgress(0); // Reset the progress bar
+  };
+
+  const restartRecording = () => {
+    audioChunksRef.current = [];
+    startRecording();
+    setIsRecorded(false);
   };
 
   const handleSubmit = async () => {
@@ -55,6 +96,7 @@ const TempForm: React.FC = () => {
       return;
     }
 
+    setLoading(true); // Set loading to true when the submission starts
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
     audioChunksRef.current = [];
     const audioUrl = URL.createObjectURL(audioBlob);
@@ -77,8 +119,16 @@ const TempForm: React.FC = () => {
     } catch (error) {
       console.error("Error uploading audio:", error);
       setError("Error uploading audio.");
+    } finally {
+      setLoading(false); // Set loading to false when the submission is complete
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -152,36 +202,116 @@ const TempForm: React.FC = () => {
             },
           }}
         />
-        <Button
-          onClick={recording ? stopRecording : startRecording}
-          variant="contained"
-          sx={{
-            backgroundColor: recording ? "#D32F2F" : "#6200EE",
-            "&:hover": {
-              backgroundColor: recording ? "#B71C1C" : "#3700B3",
-            },
-            padding: "10px 24px",
-            fontSize: "16px",
-            marginBottom: 2,
-          }}
-        >
-          {recording ? "Stop Recording" : "Start Recording"}
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          sx={{
-            backgroundColor: "#6200EE",
-            "&:hover": {
-              backgroundColor: "#3700B3",
-            },
-            padding: "10px 24px",
-            fontSize: "16px",
-          }}
-          disabled={recording}
-        >
-          Submit
-        </Button>
+        {recording && (
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            sx={{
+              width: "100%",
+              maxWidth: "600px",
+              marginBottom: 2,
+            }}
+          />
+        )}
+        <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
+          {!recording && !paused && !isRecorded && (
+            <Button
+              onClick={startRecording}
+              variant="contained"
+              sx={{
+                backgroundColor: "#6200EE",
+                "&:hover": {
+                  backgroundColor: "#3700B3",
+                },
+                padding: "10px 24px",
+                fontSize: "16px",
+              }}
+            >
+              Start Recording
+            </Button>
+          )}
+          {recording && !paused && (
+            <Button
+              onClick={pauseRecording}
+              variant="contained"
+              sx={{
+                backgroundColor: "#FFA000",
+                "&:hover": {
+                  backgroundColor: "#FF8F00",
+                },
+                padding: "10px 24px",
+                fontSize: "16px",
+              }}
+            >
+              Pause
+            </Button>
+          )}
+          {paused && (
+            <Button
+              onClick={resumeRecording}
+              variant="contained"
+              sx={{
+                backgroundColor: "#FFA000",
+                "&:hover": {
+                  backgroundColor: "#FF8F00",
+                },
+                padding: "10px 24px",
+                fontSize: "16px",
+              }}
+            >
+              Resume
+            </Button>
+          )}
+          {(recording || paused) && (
+            <Button
+              onClick={stopRecording}
+              variant="contained"
+              sx={{
+                backgroundColor: "#D32F2F",
+                "&:hover": {
+                  backgroundColor: "#B71C1C",
+                },
+                padding: "10px 24px",
+                fontSize: "16px",
+              }}
+            >
+              Stop
+            </Button>
+          )}
+        </Box>
+        {isRecorded && !recording && !paused && (
+          <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
+            <Button
+              onClick={restartRecording}
+              variant="contained"
+              sx={{
+                backgroundColor: "#FFF",
+                color: "#000",
+                "&:hover": {
+                  backgroundColor: "#EEE",
+                },
+                padding: "10px 24px",
+                fontSize: "16px",
+              }}
+            >
+              Restart
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              sx={{
+                backgroundColor: "#6200EE",
+                "&:hover": {
+                  backgroundColor: "#3700B3",
+                },
+                padding: "10px 24px",
+                fontSize: "16px",
+              }}
+            >
+              Submit Recording
+            </Button>
+          </Box>
+        )}
         {error && (
           <Typography sx={{ color: "red", marginTop: 2 }}>{error}</Typography>
         )}
@@ -198,12 +328,10 @@ const TempForm: React.FC = () => {
               borderRadius: "8px",
             }}
           >
-            <IconButton aria-label="play/pause">
-              <PlayArrowIcon sx={{ height: 38, width: 38, color: "white" }} />
-            </IconButton>
             <audio src={audioURL} controls style={{ width: "100%" }} />
           </Box>
         )}
+        {loading && <CircularProgress sx={{ marginTop: 2 }} />}
         {transcription && (
           <Box
             sx={{

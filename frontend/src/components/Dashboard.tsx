@@ -18,7 +18,7 @@ import SpotifyIcon from "@mui/icons-material/MusicNote";
 import SlackIcon from "@mui/icons-material/Chat";
 import Sidebar from "./Sidebar";
 
-const TempDash: React.FC = () => {
+const Dashboard: React.FC = () => {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -71,4 +71,4 @@ const TempDash: React.FC = () => {
   );
 };
 
-export default TempDash;
+export default Dashboard;
