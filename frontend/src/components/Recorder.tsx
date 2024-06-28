@@ -3,13 +3,20 @@ import {
   Box,
   CssBaseline,
   Typography,
-  Button,
   TextField,
   LinearProgress,
   CircularProgress,
 } from "@mui/material";
-import Sidebar from "./Sidebar";
+import Sidebar from "./ui/Sidebar";
 import axiosInstance from "../axiosConfig";
+import {
+  StartRecordingButton,
+  PauseRecordingButton,
+  ResumeRecordingButton,
+  StopRecordingButton,
+  RestartRecordingButton,
+  SubmitRecordingButton,
+} from "./ui/RecordingButtons";
 
 const TempForm: React.FC = () => {
   const [recording, setRecording] = useState(false);
@@ -25,7 +32,7 @@ const TempForm: React.FC = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const maxDuration = 2 * 60 * 1000; // 3 minutes in milliseconds
+  const maxDuration = 3 * 60 * 1000; // 3 minutes in milliseconds
 
   const startRecording = () => {
     navigator.mediaDevices
@@ -158,16 +165,7 @@ const TempForm: React.FC = () => {
             color: "#AAA",
           }}
         >
-          Prep for Google interview
-        </Typography>
-        <Typography
-          variant="h6"
-          sx={{
-            marginBottom: 2,
-            color: "#AAA",
-          }}
-        >
-          Give an example of when you've worked in a team.
+          Practice with a custom interview question
         </Typography>
         <TextField
           placeholder="Enter interview question..."
@@ -215,101 +213,20 @@ const TempForm: React.FC = () => {
         )}
         <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
           {!recording && !paused && !isRecorded && (
-            <Button
-              onClick={startRecording}
-              variant="contained"
-              sx={{
-                backgroundColor: "#6200EE",
-                "&:hover": {
-                  backgroundColor: "#3700B3",
-                },
-                padding: "10px 24px",
-                fontSize: "16px",
-              }}
-            >
-              Start Recording
-            </Button>
+            <StartRecordingButton onClick={startRecording} />
           )}
           {recording && !paused && (
-            <Button
-              onClick={pauseRecording}
-              variant="contained"
-              sx={{
-                backgroundColor: "#FFA000",
-                "&:hover": {
-                  backgroundColor: "#FF8F00",
-                },
-                padding: "10px 24px",
-                fontSize: "16px",
-              }}
-            >
-              Pause
-            </Button>
+            <PauseRecordingButton onClick={pauseRecording} />
           )}
-          {paused && (
-            <Button
-              onClick={resumeRecording}
-              variant="contained"
-              sx={{
-                backgroundColor: "#FFA000",
-                "&:hover": {
-                  backgroundColor: "#FF8F00",
-                },
-                padding: "10px 24px",
-                fontSize: "16px",
-              }}
-            >
-              Resume
-            </Button>
-          )}
+          {paused && <ResumeRecordingButton onClick={resumeRecording} />}
           {(recording || paused) && (
-            <Button
-              onClick={stopRecording}
-              variant="contained"
-              sx={{
-                backgroundColor: "#D32F2F",
-                "&:hover": {
-                  backgroundColor: "#B71C1C",
-                },
-                padding: "10px 24px",
-                fontSize: "16px",
-              }}
-            >
-              Stop
-            </Button>
+            <StopRecordingButton onClick={stopRecording} />
           )}
         </Box>
         {isRecorded && !recording && !paused && (
           <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
-            <Button
-              onClick={restartRecording}
-              variant="contained"
-              sx={{
-                backgroundColor: "#FFF",
-                color: "#000",
-                "&:hover": {
-                  backgroundColor: "#EEE",
-                },
-                padding: "10px 24px",
-                fontSize: "16px",
-              }}
-            >
-              Restart
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              variant="contained"
-              sx={{
-                backgroundColor: "#6200EE",
-                "&:hover": {
-                  backgroundColor: "#3700B3",
-                },
-                padding: "10px 24px",
-                fontSize: "16px",
-              }}
-            >
-              Submit Recording
-            </Button>
+            <RestartRecordingButton onClick={restartRecording} />
+            <SubmitRecordingButton onClick={handleSubmit} />
           </Box>
         )}
         {error && (

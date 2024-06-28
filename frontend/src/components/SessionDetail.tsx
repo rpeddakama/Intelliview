@@ -9,7 +9,7 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
-import Sidebar from "./Sidebar";
+import Sidebar from "./ui/Sidebar";
 
 interface Recording {
   _id: string;

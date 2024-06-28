@@ -7,7 +7,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import Sidebar from "./Sidebar";
+import Sidebar from "./ui/Sidebar";
 
 const TempForm: React.FC = () => {
   return (

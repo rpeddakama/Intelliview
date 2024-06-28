@@ -16,7 +16,7 @@ import AmazonIcon from "@mui/icons-material/ShoppingCart";
 import AppleIcon from "@mui/icons-material/Apple";
 import SpotifyIcon from "@mui/icons-material/MusicNote";
 import SlackIcon from "@mui/icons-material/Chat";
-import Sidebar from "./Sidebar";
+import Sidebar from "./ui/Sidebar";
 
 const Dashboard: React.FC = () => {
   return (
