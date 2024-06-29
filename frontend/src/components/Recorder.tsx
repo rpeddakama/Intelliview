@@ -17,6 +17,7 @@ import {
   RestartRecordingButton,
   SubmitRecordingButton,
 } from "./ui/RecordingButtons";
+import Chat from "./Chat"; // Import the Chat component
 
 const TempForm: React.FC = () => {
   const [recording, setRecording] = useState(false);
@@ -29,6 +30,7 @@ const TempForm: React.FC = () => {
   const [isRecorded, setIsRecorded] = useState(false);
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false); // New state to track submission
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -46,6 +48,7 @@ const TempForm: React.FC = () => {
         setRecording(true);
         setPaused(false);
         setError(null);
+        setSubmitted(false); // Reset submission state when recording starts
 
         const startTime = Date.now();
         intervalRef.current = setInterval(() => {
@@ -91,6 +94,7 @@ const TempForm: React.FC = () => {
     audioChunksRef.current = [];
     startRecording();
     setIsRecorded(false);
+    setSubmitted(false); // Reset submission state
   };
 
   const handleSubmit = async () => {
@@ -104,6 +108,7 @@ const TempForm: React.FC = () => {
     }
 
     setLoading(true); // Set loading to true when the submission starts
+    setSubmitted(true); // Set submission state to true immediately on submit
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
     audioChunksRef.current = [];
     const audioUrl = URL.createObjectURL(audioBlob);
@@ -126,6 +131,7 @@ const TempForm: React.FC = () => {
     } catch (error) {
       console.error("Error uploading audio:", error);
       setError("Error uploading audio.");
+      setSubmitted(false); // Reset submission state on error
     } finally {
       setLoading(false); // Set loading to false when the submission is complete
     }
@@ -223,7 +229,7 @@ const TempForm: React.FC = () => {
             <StopRecordingButton onClick={stopRecording} />
           )}
         </Box>
-        {isRecorded && !recording && !paused && (
+        {isRecorded && !recording && !paused && !submitted && (
           <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
             <RestartRecordingButton onClick={restartRecording} />
             <SubmitRecordingButton onClick={handleSubmit} />
@@ -280,6 +286,9 @@ const TempForm: React.FC = () => {
               <strong>Analysis:</strong> {analysis}
             </Typography>
           </Box>
+        )}
+        {transcription && analysis && (
+          <Chat transcription={transcription} analysis={analysis} />
         )}
       </Box>
     </Box>

@@ -15,7 +15,8 @@ const router = Router();
 dotenv.config();
 
 // Define routes
-router.get("/message", (req, res) => {
+router.get("/message", async (req, res) => {
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   res.send("Hello from the API!");
 });
 
@@ -34,6 +35,46 @@ router.post("/notes", authenticateToken, async (req, res) => {
     res.status(201).json({ message: "Note added successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.post("/chat", async (req: Request, res: Response) => {
+  const { transcription, analysis, input } = req.body;
+
+  if (!analysis || !transcription) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  try {
+    const chatConfig = {
+      method: "post",
+      url: "https://api.openai.com/v1/chat/completions",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
+      },
+      data: JSON.stringify({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: `You are an interview assistant. Here is what they responded to a question: ${transcription} and here is what
+              the ai thought of the response: ${analysis}. You should respond to additional questions to the best of your ability.`,
+          },
+          { role: "user", content: input },
+        ],
+        max_tokens: 500,
+      }),
+    };
+
+    const response = await axios(chatConfig);
+
+    const reply = response.data.choices[0].message.content;
+
+    res.json({ reply });
+  } catch (error) {
+    console.error("Error communicating with OpenAI API:", error);
+    res.status(500).json({ error: "Error communicating with OpenAI API" });
   }
 });
 
