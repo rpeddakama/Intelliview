@@ -288,7 +288,11 @@ const TempForm: React.FC = () => {
           </Box>
         )}
         {transcription && analysis && (
-          <Chat transcription={transcription} analysis={analysis} />
+          <Chat
+            question={question}
+            transcription={transcription}
+            analysis={analysis}
+          />
         )}
       </Box>
     </Box>

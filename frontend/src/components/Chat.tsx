@@ -12,11 +12,12 @@ import {
 import axiosInstance from "../axiosConfig";
 
 interface ChatProps {
+  question: string;
   transcription: string;
   analysis: string;
 }
 
-const Chat: React.FC<ChatProps> = ({ transcription, analysis }) => {
+const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
   const [messages, setMessages] = useState<{ user: string; text: string }[]>(
     []
   );
@@ -34,6 +35,7 @@ const Chat: React.FC<ChatProps> = ({ transcription, analysis }) => {
 
     try {
       const response = await axiosInstance.post("/api/chat", {
+        question: question,
         transcription: transcription,
         analysis: analysis,
         input: input,

@@ -39,7 +39,7 @@ router.post("/notes", authenticateToken, async (req, res) => {
 });
 
 router.post("/chat", async (req: Request, res: Response) => {
-  const { transcription, analysis, input } = req.body;
+  const { question, transcription, analysis, input } = req.body;
 
   if (!analysis || !transcription) {
     return res.status(400).json({ error: "Message is required" });
@@ -58,8 +58,9 @@ router.post("/chat", async (req: Request, res: Response) => {
         messages: [
           {
             role: "system",
-            content: `You are an interview assistant. Here is what they responded to a question: ${transcription} and here is what
-              the ai thought of the response: ${analysis}. You should respond to additional questions to the best of your ability.`,
+            content: `You are an interview assistant. Here is what they responded to the 
+            question: ${question}: ${transcription} and here is what the ai thought of the 
+            response: ${analysis}. You should respond to additional questions to the best of your ability.`,
           },
           { role: "user", content: input },
         ],
