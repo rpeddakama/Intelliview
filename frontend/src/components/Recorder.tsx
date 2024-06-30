@@ -1,100 +1,34 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   CssBaseline,
   Typography,
   TextField,
-  LinearProgress,
   CircularProgress,
+  Button,
 } from "@mui/material";
 import Sidebar from "./ui/Sidebar";
 import axiosInstance from "../axiosConfig";
-import {
-  StartRecordingButton,
-  PauseRecordingButton,
-  ResumeRecordingButton,
-  StopRecordingButton,
-  RestartRecordingButton,
-  SubmitRecordingButton,
-} from "./ui/RecordingButtons";
-import Chat from "./Chat"; // Import the Chat component
+import AudioRecorder from "./ui/Audio";
+import Chat from "./Chat";
 
 const TempForm: React.FC = () => {
-  const [recording, setRecording] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [transcription, setTranscription] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [question, setQuestion] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [isRecorded, setIsRecorded] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false); // New state to track submission
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const maxDuration = 3 * 60 * 1000; // 3 minutes in milliseconds
 
-  const startRecording = () => {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        mediaRecorderRef.current = new MediaRecorder(stream);
-        mediaRecorderRef.current.ondataavailable = (event) => {
-          audioChunksRef.current.push(event.data);
-        };
-        mediaRecorderRef.current.start();
-        setRecording(true);
-        setPaused(false);
-        setError(null);
-        setSubmitted(false); // Reset submission state when recording starts
-
-        const startTime = Date.now();
-        intervalRef.current = setInterval(() => {
-          const elapsedTime = Date.now() - startTime;
-          const progress = (elapsedTime / maxDuration) * 100;
-          if (progress >= 100) {
-            clearInterval(intervalRef.current!);
-            setRecording(false);
-            setPaused(false);
-            setProgress(100);
-            stopRecording();
-          } else {
-            setProgress(progress);
-          }
-        }, 1000);
-      })
-      .catch((error) => {
-        console.error("Error accessing microphone:", error);
-        setError("Error accessing microphone.");
-      });
+  const handleRecordingComplete = (blob: Blob) => {
+    setAudioBlob(blob);
   };
 
-  const pauseRecording = () => {
-    mediaRecorderRef.current?.pause();
-    setPaused(true);
-  };
-
-  const resumeRecording = () => {
-    mediaRecorderRef.current?.resume();
-    setPaused(false);
-  };
-
-  const stopRecording = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    mediaRecorderRef.current?.stop();
-    setRecording(false);
-    setPaused(false);
-    setIsRecorded(true);
-    setProgress(0); // Reset the progress bar
-  };
-
-  const restartRecording = () => {
-    audioChunksRef.current = [];
-    startRecording();
-    setIsRecorded(false);
-    setSubmitted(false); // Reset submission state
+  const handleRestart = () => {
+    setAudioBlob(null);
+    setTranscription(null);
+    setAnalysis(null);
+    setError(null);
   };
 
   const handleSubmit = async () => {
@@ -102,18 +36,12 @@ const TempForm: React.FC = () => {
       setError("Question is required.");
       return;
     }
-    if (audioChunksRef.current.length === 0) {
+    if (!audioBlob) {
       setError("No audio recorded.");
       return;
     }
 
-    setLoading(true); // Set loading to true when the submission starts
-    setSubmitted(true); // Set submission state to true immediately on submit
-    const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-    audioChunksRef.current = [];
-    const audioUrl = URL.createObjectURL(audioBlob);
-    setAudioURL(audioUrl);
-
+    setLoading(true);
     const formData = new FormData();
     formData.append("audio", audioBlob);
     formData.append("question", question);
@@ -124,24 +52,16 @@ const TempForm: React.FC = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(response);
       setTranscription(response.data.transcription);
       setAnalysis(response.data.analysis);
       setError(null);
     } catch (error) {
       console.error("Error uploading audio:", error);
       setError("Error uploading audio.");
-      setSubmitted(false); // Reset submission state on error
     } finally {
-      setLoading(false); // Set loading to false when the submission is complete
+      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -160,7 +80,7 @@ const TempForm: React.FC = () => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "flex-start",
-          paddingTop: "64px", // To align with the sidebar
+          paddingTop: "64px",
         }}
       >
         <Typography
@@ -206,53 +126,21 @@ const TempForm: React.FC = () => {
             },
           }}
         />
-        {recording && (
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              width: "100%",
-              maxWidth: "600px",
-              marginBottom: 2,
-            }}
-          />
-        )}
-        <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
-          {!recording && !paused && !isRecorded && (
-            <StartRecordingButton onClick={startRecording} />
-          )}
-          {recording && !paused && (
-            <PauseRecordingButton onClick={pauseRecording} />
-          )}
-          {paused && <ResumeRecordingButton onClick={resumeRecording} />}
-          {(recording || paused) && (
-            <StopRecordingButton onClick={stopRecording} />
-          )}
-        </Box>
-        {isRecorded && !recording && !paused && !submitted && (
-          <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
-            <RestartRecordingButton onClick={restartRecording} />
-            <SubmitRecordingButton onClick={handleSubmit} />
+        <AudioRecorder
+          onRecordingComplete={handleRecordingComplete}
+          onRestart={handleRestart}
+        />
+        {audioBlob && (
+          <Box
+            sx={{ display: "flex", justifyContent: "center", mt: 2, gap: 2 }}
+          >
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
+              Submit Recording
+            </Button>
           </Box>
         )}
         {error && (
           <Typography sx={{ color: "red", marginTop: 2 }}>{error}</Typography>
-        )}
-        {audioURL && (
-          <Box
-            sx={{
-              marginTop: 2,
-              display: "flex",
-              alignItems: "center",
-              width: "100%",
-              maxWidth: "600px",
-              backgroundColor: "#333",
-              padding: "10px",
-              borderRadius: "8px",
-            }}
-          >
-            <audio src={audioURL} controls style={{ width: "100%" }} />
-          </Box>
         )}
         {loading && <CircularProgress sx={{ marginTop: 2 }} />}
         {transcription && (
