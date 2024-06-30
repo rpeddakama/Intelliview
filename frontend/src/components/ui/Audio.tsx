@@ -1,17 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button, Box, Typography, LinearProgress } from "@mui/material";
-import { PlayArrow, Pause, Stop, Replay } from "@mui/icons-material";
+import {
+  Button,
+  Box,
+  Typography,
+  LinearProgress,
+  IconButton,
+} from "@mui/material";
+import { PlayArrow, Pause, Stop, Replay, Send } from "@mui/icons-material";
+import MicIcon from "@mui/icons-material/Mic";
 
 interface AudioRecorderProps {
   onRecordingComplete: (blob: Blob) => void;
   onRestart: () => void;
+  onSubmit: () => void;
 }
 
-const MAX_DURATION = 180; // 3 minutes in seconds
+const MAX_DURATION = 120;
 
 const AudioRecorder: React.FC<AudioRecorderProps> = ({
   onRecordingComplete,
   onRestart,
+  onSubmit,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -139,15 +148,32 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
     <Box
       sx={{
         width: "100%",
-        maxWidth: 600,
         bgcolor: "#1E1E1E",
         p: 2,
         borderRadius: 2,
+        position: "relative",
       }}
     >
       <Typography variant="h6" color="white" align="center" gutterBottom>
         {formatTime(duration)}
       </Typography>
+      {audioBlob && !isRecording && (
+        <IconButton
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            backgroundColor: "#FFFFFF",
+          }}
+          onClick={isPlaying ? pausePlayback : playRecording}
+        >
+          {isPlaying ? (
+            <Pause sx={{ color: "black" }} />
+          ) : (
+            <PlayArrow sx={{ color: "black" }} />
+          )}
+        </IconButton>
+      )}
       <LinearProgress
         variant="determinate"
         value={progress}
@@ -165,17 +191,18 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           <Button
             variant="contained"
             color="primary"
-            startIcon={<PlayArrow />}
+            style={{ backgroundColor: "#623BFB" }}
+            startIcon={<MicIcon />}
             onClick={startRecording}
             fullWidth
           >
-            Record
+            Start Recording
           </Button>
         ) : isRecording ? (
           <>
             <Button
               variant="contained"
-              color={isPaused ? "primary" : "secondary"}
+              style={{ backgroundColor: "#404040" }}
               startIcon={isPaused ? <PlayArrow /> : <Pause />}
               onClick={isPaused ? resumeRecording : pauseRecording}
               sx={{ flex: 1, mr: 1 }}
@@ -184,7 +211,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
             </Button>
             <Button
               variant="contained"
-              color="error"
+              style={{ color: "#fffff", backgroundColor: "#CD2222" }}
               startIcon={<Stop />}
               onClick={stopRecording}
               sx={{ flex: 1, mx: 1 }}
@@ -193,7 +220,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
             </Button>
             <Button
               variant="contained"
-              color="info"
+              style={{ color: "black", backgroundColor: "#FFFFFF" }}
               startIcon={<Replay />}
               onClick={restartRecording}
               sx={{ flex: 1, ml: 1 }}
@@ -205,21 +232,20 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           <>
             <Button
               variant="contained"
-              color="primary"
-              startIcon={isPlaying ? <Pause /> : <PlayArrow />}
-              onClick={isPlaying ? pausePlayback : playRecording}
+              style={{ color: "black", backgroundColor: "#FFFFFF" }}
+              startIcon={<Replay />}
+              onClick={restartRecording}
               sx={{ flex: 1, mr: 1 }}
             >
-              {isPlaying ? "Pause" : "Play"}
+              Restart
             </Button>
             <Button
               variant="contained"
-              color="info"
-              startIcon={<Replay />}
-              onClick={restartRecording}
+              style={{ backgroundColor: "#623BFB" }}
+              onClick={onSubmit}
               sx={{ flex: 1, ml: 1 }}
             >
-              Restart
+              Generate Analysis
             </Button>
           </>
         )}

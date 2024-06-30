@@ -5,7 +5,6 @@ import {
   Typography,
   TextField,
   CircularProgress,
-  Button,
 } from "@mui/material";
 import Sidebar from "./ui/Sidebar";
 import axiosInstance from "../axiosConfig";
@@ -19,6 +18,7 @@ const TempForm: React.FC = () => {
   const [question, setQuestion] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleRecordingComplete = (blob: Blob) => {
     setAudioBlob(blob);
@@ -29,6 +29,7 @@ const TempForm: React.FC = () => {
     setTranscription(null);
     setAnalysis(null);
     setError(null);
+    setIsSubmitted(false);
   };
 
   const handleSubmit = async () => {
@@ -41,6 +42,7 @@ const TempForm: React.FC = () => {
       return;
     }
 
+    setIsSubmitted(true);
     setLoading(true);
     const formData = new FormData();
     formData.append("audio", audioBlob);
@@ -88,59 +90,65 @@ const TempForm: React.FC = () => {
           sx={{
             fontWeight: "bold",
             marginBottom: 2,
-            color: "#AAA",
+            color: "#FFFFFF",
+            width: "100%",
+            maxWidth: "600px",
           }}
         >
           Practice with a custom interview question
         </Typography>
-        <TextField
-          placeholder="Enter interview question..."
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          multiline
-          rows={4}
-          variant="filled"
-          fullWidth
-          InputProps={{
-            disableUnderline: true,
-            style: {
-              color: "white",
-              backgroundColor: "#333",
-            },
-          }}
-          sx={{
-            width: "100%",
-            maxWidth: "600px",
-            marginBottom: 2,
-            "& .MuiFilledInput-root": {
-              backgroundColor: "#333",
-              "&:hover": {
-                backgroundColor: "#444",
-              },
-              "&.Mui-focused": {
+        <Box sx={{ width: "100%", maxWidth: "600px" }}>
+          <TextField
+            placeholder="Enter interview question..."
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            // disabled={isSubmitted}
+            multiline
+            rows={4}
+            variant="filled"
+            fullWidth
+            InputProps={{
+              disableUnderline: true,
+              style: {
+                color: "white",
                 backgroundColor: "#333",
               },
-            },
-            "& .MuiInputBase-input": {
-              color: "white",
-            },
-          }}
-        />
-        <AudioRecorder
-          onRecordingComplete={handleRecordingComplete}
-          onRestart={handleRestart}
-        />
-        {audioBlob && (
-          <Box
-            sx={{ display: "flex", justifyContent: "center", mt: 2, gap: 2 }}
-          >
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-              Submit Recording
-            </Button>
-          </Box>
-        )}
+            }}
+            sx={{
+              marginBottom: 2,
+              "& .MuiFilledInput-root": {
+                backgroundColor: "#333",
+                "&:hover": {
+                  backgroundColor: "#444",
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "#333",
+                },
+              },
+              "& .MuiInputBase-input": {
+                color: "white",
+              },
+            }}
+          />
+        </Box>
+        <Box sx={{ width: "100%", maxWidth: "600px" }}>
+          <AudioRecorder
+            onRecordingComplete={handleRecordingComplete}
+            onRestart={handleRestart}
+            onSubmit={handleSubmit}
+          />
+        </Box>
         {error && (
-          <Typography sx={{ color: "red", marginTop: 2 }}>{error}</Typography>
+          <Typography
+            sx={{
+              color: "red",
+              marginTop: 2,
+              width: "100%",
+              maxWidth: "600px",
+            }}
+          >
+            {error}
+          </Typography>
         )}
         {loading && <CircularProgress sx={{ marginTop: 2 }} />}
         {transcription && (
@@ -176,11 +184,13 @@ const TempForm: React.FC = () => {
           </Box>
         )}
         {transcription && analysis && (
-          <Chat
-            question={question}
-            transcription={transcription}
-            analysis={analysis}
-          />
+          <Box sx={{ width: "100%", maxWidth: "600px" }}>
+            <Chat
+              question={question}
+              transcription={transcription}
+              analysis={analysis}
+            />
+          </Box>
         )}
       </Box>
     </Box>
