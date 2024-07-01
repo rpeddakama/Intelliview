@@ -1,35 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
-import axiosInstance from "../axiosConfig";
+// import { Google as GoogleIcon } from 'lucide-react';
 
-const Login: React.FC = () => {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await axiosInstance.post("/auth/login", {
-        email,
-        password,
-      });
-      alert("Login successful");
-
-      // Store tokens in local storage
-      localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("refreshToken", response.data.refreshToken);
-
-      // Redirect to the dashboard page
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error logging in:", error);
-      alert("Login failed. Please check your email and password.");
-    }
-  };
-
+const SignUpForm = () => {
   return (
     <Box
       sx={{
@@ -41,8 +14,6 @@ const Login: React.FC = () => {
       }}
     >
       <Box
-        component="form"
-        onSubmit={handleSubmit}
         sx={{
           width: "100%",
           maxWidth: "400px",
@@ -82,11 +53,7 @@ const Login: React.FC = () => {
         <TextField
           fullWidth
           variant="filled"
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          placeholder="Name"
           sx={{
             marginBottom: "16px",
             "& .MuiFilledInput-root": {
@@ -100,11 +67,28 @@ const Login: React.FC = () => {
             },
             "& .MuiInputBase-input": {
               color: "white",
-              padding: "12px 12px 12px",
             },
           }}
-          InputProps={{
-            disableUnderline: true,
+        />
+
+        <TextField
+          fullWidth
+          variant="filled"
+          placeholder="Email"
+          sx={{
+            marginBottom: "16px",
+            "& .MuiFilledInput-root": {
+              backgroundColor: "#3A3A3A",
+              "&:hover": {
+                backgroundColor: "#444444",
+              },
+              "&.Mui-focused": {
+                backgroundColor: "#3A3A3A",
+              },
+            },
+            "& .MuiInputBase-input": {
+              color: "white",
+            },
           }}
         />
 
@@ -113,9 +97,6 @@ const Login: React.FC = () => {
           variant="filled"
           type="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
           sx={{
             marginBottom: "24px",
             "& .MuiFilledInput-root": {
@@ -129,31 +110,25 @@ const Login: React.FC = () => {
             },
             "& .MuiInputBase-input": {
               color: "white",
-              padding: "12px 12px 12px",
             },
-          }}
-          InputProps={{
-            disableUnderline: true,
           }}
         />
 
         <Button
-          type="submit"
           fullWidth
           variant="contained"
           sx={{
-            backgroundColor: "#623BFB",
+            backgroundColor: "#8B5CF6",
             color: "white",
             textTransform: "none",
             fontWeight: "bold",
             "&:hover": {
-              backgroundColor: "#623BFB",
+              backgroundColor: "#7C3AED",
             },
             marginBottom: "16px",
-            padding: "10px 0",
           }}
         >
-          Login
+          Sign Up
         </Button>
 
         <Typography
@@ -161,23 +136,28 @@ const Login: React.FC = () => {
           align="center"
           sx={{ color: "#888888", marginBottom: "16px" }}
         >
-          Don't have an account?{" "}
-          <Button
-            color="primary"
-            onClick={() => navigate("/register")}
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              padding: 0,
-              minWidth: "auto",
-            }}
-          >
-            Sign up
-          </Button>
+          or
         </Typography>
+
+        <Button
+          fullWidth
+          variant="outlined"
+          //   startIcon={<GoogleIcon size={20} />}
+          sx={{
+            borderColor: "#3A3A3A",
+            color: "white",
+            textTransform: "none",
+            "&:hover": {
+              borderColor: "#4A4A4A",
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+            },
+          }}
+        >
+          Continue with Google
+        </Button>
       </Box>
     </Box>
   );
 };
 
-export default Login;
+export default SignUpForm;

@@ -10,12 +10,14 @@ import PastSessions from "./components/PastSessions";
 import TempForm from "./components/tempForm";
 import TempSessions from "./components/TempSessions";
 import SessionDetail from "./components/SessionDetail";
+import SignUpForm from "./components/helloworld";
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
         <Route path="login" element={<Login />} />
+        <Route path="helloworld" element={<SignUpForm />} />
         <Route path="register" element={<Register />} />
         <Route path="tempform" element={<TempForm />} />
         <Route element={<ProtectedRoutes />}>
