@@ -189,4 +189,26 @@ router.get(
   }
 );
 
+// router.get(
+//   "/recordings/:id",
+//   authenticateToken,
+//   async (req: Request, res: Response) => {
+//     try {
+//       const user = (req as any).user;
+//       const recordingId = req.params.id;
+
+//       const recording = await Recording.findOne({
+//         _id: recordingId,
+//         user: user._id,
+//       });
+//       if (!recording) {
+//         return res.status(404).json({ message: "Recording not found" });
+//       }
+//       res.json(recording);
+//     } catch (error) {
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   }
+// );
+
 export default router;

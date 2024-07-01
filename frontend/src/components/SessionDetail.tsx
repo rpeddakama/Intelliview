@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axiosInstance from "../axiosConfig";
 import { useParams } from "react-router-dom";
-import {
-  Box,
-  CssBaseline,
-  Toolbar,
-  Typography,
-  Card,
-  CardContent,
-} from "@mui/material";
+import axiosInstance from "../axiosConfig";
+import { Box, CssBaseline, Toolbar, Typography, Divider } from "@mui/material";
 import Sidebar from "./ui/Sidebar";
 
 interface Recording {
@@ -17,29 +10,27 @@ interface Recording {
   transcription: string;
   analysis: string;
   date: string;
-  audioUrl: string;
 }
 
 const SessionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [session, setSession] = useState<Recording | null>(null);
+  const [recording, setRecording] = useState<Recording | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSession = async () => {
+    const fetchRecording = async () => {
       try {
         const response = await axiosInstance.get(`/api/recordings/${id}`);
-        setSession(response.data);
+        setRecording(response.data);
+        setError(null);
       } catch (error) {
-        console.error("Error fetching session details:", error);
+        console.error("Error fetching recording:", error);
+        setError("Error fetching recording.");
       }
     };
 
-    fetchSession();
+    fetchRecording();
   }, [id]);
-
-  if (!session) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -57,36 +48,34 @@ const SessionDetail: React.FC = () => {
         }}
       >
         <Toolbar />
-        <Typography variant="h5" gutterBottom>
-          {session.question}
-        </Typography>
-        <Card sx={{ bgcolor: "#333", color: "white", mb: 3 }}>
-          <CardContent>
-            <Typography variant="h6">Question</Typography>
-            <Typography>{session.question}</Typography>
-          </CardContent>
-        </Card>
-        <Card sx={{ bgcolor: "#333", color: "white", mb: 3 }}>
-          <CardContent>
-            <Typography variant="h6">Transcription</Typography>
-            <Typography>{session.transcription}</Typography>
-          </CardContent>
-        </Card>
-        <Card sx={{ bgcolor: "#333", color: "white", mb: 3 }}>
-          <CardContent>
-            <Typography variant="h6">Audio</Typography>
-            <audio controls>
-              <source src={session.audioUrl} type="audio/mpeg" />
-              Your browser does not support the audio element.
-            </audio>
-          </CardContent>
-        </Card>
-        <Card sx={{ bgcolor: "#333", color: "white", mb: 3 }}>
-          <CardContent>
-            <Typography variant="h6">Analysis</Typography>
-            <Typography>{session.analysis}</Typography>
-          </CardContent>
-        </Card>
+        {error ? (
+          <Typography color="error">{error}</Typography>
+        ) : (
+          recording && (
+            <>
+              <Typography variant="h5" gutterBottom>
+                Session Details
+              </Typography>
+              <Typography variant="h6">{recording.question}</Typography>
+              <Typography variant="body1" sx={{ mt: 2 }}>
+                <strong>Transcription:</strong>
+                <br />
+                {recording.transcription}
+              </Typography>
+              <Divider sx={{ my: 2, bgcolor: "#444" }} />
+              <Typography variant="body1">
+                <strong>Analysis:</strong>
+                <br />
+                {recording.analysis}
+              </Typography>
+              <Divider sx={{ my: 2, bgcolor: "#444" }} />
+              <Typography variant="body1" color="gray">
+                <strong>Date:</strong>{" "}
+                {new Date(recording.date).toLocaleString()}
+              </Typography>
+            </>
+          )
+        )}
       </Box>
     </Box>
   );

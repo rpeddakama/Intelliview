@@ -11,7 +11,7 @@ import axiosInstance from "../axiosConfig";
 import AudioRecorder from "./ui/Audio";
 import Chat from "./Chat";
 
-const TempForm: React.FC = () => {
+const Recorder: React.FC = () => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [transcription, setTranscription] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string | null>(null);
@@ -197,4 +197,4 @@ const TempForm: React.FC = () => {
   );
 };
 
-export default TempForm;
+export default Recorder;
