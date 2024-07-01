@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Home, Settings, History } from "@mui/icons-material";
+import { Link } from "react-router-dom";
 import Logout from "../Logout";
 
 const Sidebar: React.FC = () => {
@@ -39,10 +40,16 @@ const Sidebar: React.FC = () => {
       </Toolbar>
       <Divider />
       <List>
-        {["Home", "Past Sessions", "Settings"].map((text, index) => (
+        {[
+          { text: "Home", icon: <Home />, link: "/dashboard" },
+          { text: "Past Sessions", icon: <History />, link: "/temp-sessions" },
+          { text: "Settings", icon: <Settings />, link: "/settings" },
+        ].map((item) => (
           <ListItem
             button
-            key={text}
+            component={Link}
+            to={item.link}
+            key={item.text}
             sx={{
               "&:hover": {
                 backgroundColor: "#444",
@@ -59,15 +66,9 @@ const Sidebar: React.FC = () => {
             }}
           >
             <ListItemIcon sx={{ color: "inherit", minWidth: "40px" }}>
-              {index === 0 ? (
-                <Home />
-              ) : index === 1 ? (
-                <History />
-              ) : (
-                <Settings />
-              )}
+              {item.icon}
             </ListItemIcon>
-            <ListItemText primary={text} sx={{ color: "inherit" }} />
+            <ListItemText primary={item.text} sx={{ color: "inherit" }} />
           </ListItem>
         ))}
         <Logout />
