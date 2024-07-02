@@ -1,32 +1,34 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { Box, Typography, TextField, Button, Snackbar } from "@mui/material";
 import axiosInstance from "../axiosConfig";
+import { setAuthToken } from "../utils/auth";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     try {
       const response = await axiosInstance.post("/auth/login", {
         email,
         password,
       });
-      alert("Login successful");
 
-      // Store tokens in local storage
-      localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("refreshToken", response.data.refreshToken);
-
-      // Redirect to the dashboard page
+      const { accessToken } = response.data;
+      setAuthToken(accessToken);
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error logging in:", error);
-      alert("Login failed. Please check your email and password.");
+      setError(
+        error.response?.data?.message ||
+          "Login failed. Please check your email and password."
+      );
     }
   };
 
@@ -176,6 +178,12 @@ const Login: React.FC = () => {
           </Button>
         </Typography>
       </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        message={error}
+      />
     </Box>
   );
 };

@@ -7,11 +7,21 @@ import path from "path";
 import fs from "fs";
 
 var cors = require("cors");
+var cookieParser = require("cookie-parser");
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
+
+const corsOptions = {
+  origin: process.env.CLIENT_URL,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 
 mongoose
   .connect(process.env.MONGO_URI as string)
