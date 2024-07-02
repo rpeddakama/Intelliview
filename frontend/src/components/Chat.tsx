@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { Box, TextField, Button, Typography, keyframes } from "@mui/material";
 import axiosInstance from "../axiosConfig";
 
 interface ChatProps {
@@ -13,6 +13,29 @@ interface Message {
   text: string;
 }
 
+const typingAnimation = keyframes`
+  0% { opacity: .2; }
+  20% { opacity: 1; }
+  100% { opacity: .2; }
+`;
+
+const TypingBubble = () => (
+  <Box sx={{ display: "flex", columnGap: "4px", marginTop: "8px" }}>
+    {[0, 1, 2].map((i) => (
+      <Box
+        key={i}
+        sx={{
+          width: "8px",
+          height: "8px",
+          backgroundColor: "white",
+          borderRadius: "50%",
+          animation: `${typingAnimation} 1s infinite ${i * 0.3}s`,
+        }}
+      />
+    ))}
+  </Box>
+);
+
 const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
@@ -20,7 +43,6 @@ const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
     useState<boolean>(false);
 
   useEffect(() => {
-    // Add the initial analysis message when the component mounts
     setMessages([{ user: "Maxview AI", text: analysis }]);
   }, [analysis]);
 
@@ -110,6 +132,14 @@ const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
             </Typography>
           </Box>
         ))}
+        {isWaitingForResponse && (
+          <Box sx={{ marginBottom: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+              Maxview AI:
+            </Typography>
+            <TypingBubble />
+          </Box>
+        )}
       </Box>
       <Box sx={{ display: "flex" }}>
         <TextField
