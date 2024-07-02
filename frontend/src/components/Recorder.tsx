@@ -151,7 +151,7 @@ const Recorder: React.FC = () => {
           </Typography>
         )}
         {loading && <CircularProgress sx={{ marginTop: 2 }} />}
-        {transcription && (
+        {/* {transcription && (
           <Box
             sx={{
               marginTop: 2,
@@ -182,7 +182,7 @@ const Recorder: React.FC = () => {
               <strong>Analysis:</strong> {analysis}
             </Typography>
           </Box>
-        )}
+        )} */}
         {transcription && analysis && (
           <Box sx={{ width: "100%", maxWidth: "600px" }}>
             <Chat

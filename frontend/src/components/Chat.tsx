@@ -1,14 +1,5 @@
-import React, { useState } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Typography,
-} from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, TextField, Button, Typography } from "@mui/material";
 import axiosInstance from "../axiosConfig";
 
 interface ChatProps {
@@ -17,39 +8,50 @@ interface ChatProps {
   analysis: string;
 }
 
+interface Message {
+  user: string;
+  text: string;
+}
+
 const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
-  const [messages, setMessages] = useState<{ user: string; text: string }[]>(
-    []
-  );
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
   const [isWaitingForResponse, setIsWaitingForResponse] =
     useState<boolean>(false);
 
+  useEffect(() => {
+    // Add the initial analysis message when the component mounts
+    setMessages([{ user: "Maxview AI", text: analysis }]);
+  }, [analysis]);
+
   const handleSend = async () => {
     if (input.trim() === "") return;
 
-    const newMessages = [...messages, { user: "You", text: input }];
+    const newMessages: Message[] = [...messages, { user: "You", text: input }];
     setMessages(newMessages);
     setInput("");
     setIsWaitingForResponse(true);
 
     try {
-      const response = await axiosInstance.post("/api/chat", {
-        question: question,
-        transcription: transcription,
-        analysis: analysis,
-        input: input,
-      });
+      const response = await axiosInstance.post<{ reply: string }>(
+        "/api/chat",
+        {
+          question,
+          transcription,
+          analysis,
+          input,
+        }
+      );
 
       setMessages((prevMessages) => [
         ...prevMessages,
-        { user: "Bot", text: response.data.reply },
+        { user: "Maxview AI", text: response.data.reply },
       ]);
     } catch (error) {
       console.error("Error fetching chat response:", error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { user: "Bot", text: "Error fetching response" },
+        { user: "Maxview AI", text: "Error fetching response" },
       ]);
     } finally {
       setIsWaitingForResponse(false);
@@ -61,60 +63,97 @@ const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
       sx={{
         width: "100%",
         maxWidth: "600px",
-        backgroundColor: "#333",
+        backgroundColor: "#1e1e1e",
         padding: "20px",
         borderRadius: "8px",
-        marginTop: 2,
+        color: "#ffffff",
+        fontFamily: "Arial, sans-serif",
       }}
     >
-      <Typography variant="h6" sx={{ color: "white", marginBottom: 2 }}>
-        Chat
-      </Typography>
-      {messages.length > 0 && (
-        <Paper
-          elevation={3}
-          style={{
-            maxHeight: "300px",
-            overflow: "auto",
-            backgroundColor: "#444",
+      <Typography
+        variant="h6"
+        sx={{ marginBottom: 2, display: "flex", alignItems: "center" }}
+      >
+        <Box
+          component="span"
+          sx={{
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            background: "linear-gradient(45deg, #ff00ff, #00ffff)",
+            marginRight: "10px",
           }}
-        >
-          <List>
-            {messages.map((message, index) => (
-              <ListItem key={index}>
-                <ListItemText
-                  primary={`${message.user}: ${message.text}`}
-                  sx={{ color: "white" }}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      )}
-      <Box display="flex" mt={2}>
+        />
+        Maxview AI
+      </Typography>
+      <Box
+        sx={{
+          maxHeight: "300px",
+          overflowY: "auto",
+          marginBottom: 2,
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#888",
+            borderRadius: "4px",
+          },
+        }}
+      >
+        {messages.map((message, index) => (
+          <Box key={index} sx={{ marginBottom: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+              {message.user}:
+            </Typography>
+            <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+              {message.text}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+      <Box sx={{ display: "flex" }}>
         <TextField
-          variant="outlined"
           fullWidth
-          placeholder="Type your question here..."
+          variant="outlined"
+          placeholder="Type your message..."
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSend()}
-          InputProps={{
-            style: {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setInput(e.target.value)
+          }
+          onKeyPress={(e: React.KeyboardEvent) =>
+            e.key === "Enter" && handleSend()
+          }
+          disabled={isWaitingForResponse}
+          sx={{
+            "& .MuiOutlinedInput-root": {
               color: "white",
-              backgroundColor: "#555",
+              backgroundColor: "#2a2a2a",
+              "& fieldset": {
+                borderColor: "#444",
+              },
+              "&:hover fieldset": {
+                borderColor: "#666",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#888",
+              },
             },
-            disabled: isWaitingForResponse,
           }}
         />
         <Button
           variant="contained"
-          color="primary"
           onClick={handleSend}
-          style={{ marginLeft: "1rem" }}
           disabled={isWaitingForResponse}
+          sx={{
+            marginLeft: "10px",
+            backgroundColor: "#2a2a2a",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "#444",
+            },
+          }}
         >
-          Ask
+          Send
         </Button>
       </Box>
     </Box>

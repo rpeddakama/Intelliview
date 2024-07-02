@@ -23,7 +23,16 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="login" element={<Login />} />
-          <Route path="helloworld" element={<SignUpForm />} />
+          <Route
+            path="helloworld"
+            element={
+              <SignUpForm
+                question="whats your name?"
+                transcription="robert"
+                analysis="boring name"
+              />
+            }
+          />
           <Route path="register" element={<Register />} />
           <Route path="tempform" element={<TempForm />} />
           <Route element={<ProtectedRoutes />}>

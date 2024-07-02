@@ -1,163 +1,158 @@
-import React from "react";
-import { Box, Typography, TextField, Button } from "@mui/material";
-// import { Google as GoogleIcon } from 'lucide-react';
+import React, { useState } from "react";
+import { Box, TextField, Button, Typography } from "@mui/material";
+import axiosInstance from "../axiosConfig";
 
-const SignUpForm = () => {
+interface ChatProps {
+  question: string;
+  transcription: string;
+  analysis: string;
+}
+
+interface Message {
+  user: string;
+  text: string;
+}
+
+const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState<string>("");
+  const [isWaitingForResponse, setIsWaitingForResponse] =
+    useState<boolean>(false);
+
+  const handleSend = async () => {
+    if (input.trim() === "") return;
+
+    const newMessages: Message[] = [...messages, { user: "You", text: input }];
+    setMessages(newMessages);
+    setInput("");
+    setIsWaitingForResponse(true);
+
+    try {
+      const response = await axiosInstance.post<{ reply: string }>(
+        "/api/chat",
+        {
+          question,
+          transcription,
+          analysis,
+          input,
+        }
+      );
+
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { user: "Maxview AI", text: response.data.reply },
+      ]);
+    } catch (error) {
+      console.error("Error fetching chat response:", error);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { user: "Maxview AI", text: "Error fetching response" },
+      ]);
+    } finally {
+      setIsWaitingForResponse(false);
+    }
+  };
+
   return (
     <Box
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#1E1E1E",
+        width: "100%",
+        maxWidth: "600px",
+        backgroundColor: "#1e1e1e",
+        padding: "20px",
+        borderRadius: "8px",
+        color: "#ffffff",
+        fontFamily: "Arial, sans-serif",
       }}
     >
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: "400px",
-          backgroundColor: "#2C2C2C",
-          borderRadius: "8px",
-          padding: "32px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        }}
+      <Typography
+        variant="h6"
+        sx={{ marginBottom: 2, display: "flex", alignItems: "center" }}
       >
         <Box
+          component="span"
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: "24px",
-          }}
-        >
-          <Typography
-            variant="h6"
-            sx={{
-              color: "white",
-              display: "flex",
-              alignItems: "center",
-              "&::before": {
-                content: '""',
-                width: "12px",
-                height: "12px",
-                backgroundColor: "#8B5CF6",
-                borderRadius: "50%",
-                marginRight: "8px",
-              },
-            }}
-          >
-            Maxview AI
-          </Typography>
-        </Box>
-
-        <TextField
-          fullWidth
-          variant="filled"
-          placeholder="Name"
-          sx={{
-            marginBottom: "16px",
-            "& .MuiFilledInput-root": {
-              backgroundColor: "#3A3A3A",
-              "&:hover": {
-                backgroundColor: "#444444",
-              },
-              "&.Mui-focused": {
-                backgroundColor: "#3A3A3A",
-              },
-            },
-            "& .MuiInputBase-input": {
-              color: "white",
-            },
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            background: "linear-gradient(45deg, #ff00ff, #00ffff)",
+            marginRight: "10px",
           }}
         />
-
+        Maxview AI
+      </Typography>
+      <Box
+        sx={{
+          maxHeight: "300px",
+          overflowY: "auto",
+          marginBottom: 2,
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#888",
+            borderRadius: "4px",
+          },
+        }}
+      >
+        {messages.map((message, index) => (
+          <Box key={index} sx={{ marginBottom: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+              {message.user}:
+            </Typography>
+            <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+              {message.text}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+      <Box sx={{ display: "flex" }}>
         <TextField
-          fullWidth
-          variant="filled"
-          placeholder="Email"
-          sx={{
-            marginBottom: "16px",
-            "& .MuiFilledInput-root": {
-              backgroundColor: "#3A3A3A",
-              "&:hover": {
-                backgroundColor: "#444444",
-              },
-              "&.Mui-focused": {
-                backgroundColor: "#3A3A3A",
-              },
-            },
-            "& .MuiInputBase-input": {
-              color: "white",
-            },
-          }}
-        />
-
-        <TextField
-          fullWidth
-          variant="filled"
-          type="password"
-          placeholder="Password"
-          sx={{
-            marginBottom: "24px",
-            "& .MuiFilledInput-root": {
-              backgroundColor: "#3A3A3A",
-              "&:hover": {
-                backgroundColor: "#444444",
-              },
-              "&.Mui-focused": {
-                backgroundColor: "#3A3A3A",
-              },
-            },
-            "& .MuiInputBase-input": {
-              color: "white",
-            },
-          }}
-        />
-
-        <Button
-          fullWidth
-          variant="contained"
-          sx={{
-            backgroundColor: "#8B5CF6",
-            color: "white",
-            textTransform: "none",
-            fontWeight: "bold",
-            "&:hover": {
-              backgroundColor: "#7C3AED",
-            },
-            marginBottom: "16px",
-          }}
-        >
-          Sign Up
-        </Button>
-
-        <Typography
-          variant="body2"
-          align="center"
-          sx={{ color: "#888888", marginBottom: "16px" }}
-        >
-          or
-        </Typography>
-
-        <Button
           fullWidth
           variant="outlined"
-          //   startIcon={<GoogleIcon size={20} />}
+          placeholder="Type your message..."
+          value={input}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setInput(e.target.value)
+          }
+          onKeyPress={(e: React.KeyboardEvent) =>
+            e.key === "Enter" && handleSend()
+          }
+          disabled={isWaitingForResponse}
           sx={{
-            borderColor: "#3A3A3A",
+            "& .MuiOutlinedInput-root": {
+              color: "white",
+              backgroundColor: "#2a2a2a",
+              "& fieldset": {
+                borderColor: "#444",
+              },
+              "&:hover fieldset": {
+                borderColor: "#666",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#888",
+              },
+            },
+          }}
+        />
+        <Button
+          variant="contained"
+          onClick={handleSend}
+          disabled={isWaitingForResponse}
+          sx={{
+            marginLeft: "10px",
+            backgroundColor: "#2a2a2a",
             color: "white",
-            textTransform: "none",
             "&:hover": {
-              borderColor: "#4A4A4A",
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              backgroundColor: "#444",
             },
           }}
         >
-          Continue with Google
+          Send
         </Button>
       </Box>
     </Box>
   );
 };
 
-export default SignUpForm;
+export default Chat;

@@ -129,7 +129,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
     const transcriptionResponse = await axios(transcriptionConfig);
     const transcription = transcriptionResponse.data;
 
-    const analysisPrompt = `Analyze the following transcription of a response to the following behavioral interview question: ${req.body.question}. Assess the quality of the response, including the clarity, relevance, and completeness of the answer:\n\n${transcription.text}`;
+    const analysisPrompt = `Analyze the following transcription of a response to the following behavioral interview question: ${req.body.question}. Assess the quality of the response, including the clarity, relevance, and completeness of the answer:\n\n${transcription.text}. Make sure to always end your response with "Please don't hesitate to ask any clarifying questions!"`;
 
     const analysisConfig = {
       method: "post",
