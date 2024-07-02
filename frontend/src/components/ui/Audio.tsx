@@ -13,6 +13,7 @@ interface AudioRecorderProps {
   onRecordingComplete: (blob: Blob) => void;
   onRestart: () => void;
   onSubmit: () => void;
+  isSubmitted: boolean;
 }
 
 const MAX_DURATION = 120;
@@ -21,6 +22,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
   onRecordingComplete,
   onRestart,
   onSubmit,
+  isSubmitted,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -283,7 +285,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
               Restart
             </Button>
           </>
-        ) : (
+        ) : !isSubmitted ? (
           <>
             <Button
               variant="contained"
@@ -303,7 +305,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
               Generate Analysis
             </Button>
           </>
-        )}
+        ) : null}
       </Box>
     </Box>
   );

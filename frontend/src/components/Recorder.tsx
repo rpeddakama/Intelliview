@@ -59,7 +59,10 @@ const Recorder: React.FC = () => {
       setError(null);
     } catch (error) {
       console.error("Error uploading audio:", error);
-      setError("Error uploading audio.");
+      setError(
+        "Error uploading audio. Make sure your response is more than 10 seconds."
+      );
+      setIsSubmitted(false); // Reset isSubmitted if there's an error
     } finally {
       setLoading(false);
     }
@@ -102,31 +105,34 @@ const Recorder: React.FC = () => {
             placeholder="Enter interview question..."
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            // disabled={isSubmitted}
             multiline
             rows={4}
             variant="filled"
             fullWidth
+            disabled={isSubmitted} // Disable the TextField when submitted
             InputProps={{
               disableUnderline: true,
               style: {
                 color: "white",
-                backgroundColor: "#333",
+                backgroundColor: isSubmitted ? "#2A2A2A" : "#333", // Darken background when disabled
               },
             }}
             sx={{
               marginBottom: 2,
               "& .MuiFilledInput-root": {
-                backgroundColor: "#333",
+                backgroundColor: isSubmitted ? "#2A2A2A" : "#333", // Darken background when disabled
                 "&:hover": {
-                  backgroundColor: "#444",
+                  backgroundColor: isSubmitted ? "#2A2A2A" : "#444", // Prevent hover effect when disabled
                 },
                 "&.Mui-focused": {
-                  backgroundColor: "#333",
+                  backgroundColor: isSubmitted ? "#2A2A2A" : "#333",
                 },
               },
               "& .MuiInputBase-input": {
-                color: "white",
+                color: isSubmitted ? "#A0A0A0" : "white", // Slightly dim text when disabled
+              },
+              "& .Mui-disabled": {
+                WebkitTextFillColor: "#A0A0A0", // Override WebKit's default disabled text color
               },
             }}
           />
@@ -136,6 +142,7 @@ const Recorder: React.FC = () => {
             onRecordingComplete={handleRecordingComplete}
             onRestart={handleRestart}
             onSubmit={handleSubmit}
+            isSubmitted={isSubmitted}
           />
         </Box>
         {error && (
@@ -151,38 +158,6 @@ const Recorder: React.FC = () => {
           </Typography>
         )}
         {loading && <CircularProgress sx={{ marginTop: 2 }} />}
-        {/* {transcription && (
-          <Box
-            sx={{
-              marginTop: 2,
-              width: "100%",
-              maxWidth: "600px",
-              backgroundColor: "#333",
-              padding: "20px",
-              borderRadius: "8px",
-            }}
-          >
-            <Typography variant="body1" sx={{ color: "white" }}>
-              <strong>Transcription:</strong> {transcription}
-            </Typography>
-          </Box>
-        )}
-        {analysis && (
-          <Box
-            sx={{
-              marginTop: 2,
-              width: "100%",
-              maxWidth: "600px",
-              backgroundColor: "#333",
-              padding: "20px",
-              borderRadius: "8px",
-            }}
-          >
-            <Typography variant="body1" sx={{ color: "white" }}>
-              <strong>Analysis:</strong> {analysis}
-            </Typography>
-          </Box>
-        )} */}
         {transcription && analysis && (
           <Box sx={{ width: "100%", maxWidth: "600px" }}>
             <Chat
