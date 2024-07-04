@@ -5,9 +5,9 @@ const theme = createTheme({
     fontFamily: "GT-Eesti-Regular, GT-Eesti-Medium", // Use your custom font
   },
   components: {
-    MuiButton: {
+    MuiButtonBase: {
       defaultProps: {
-        disableRipple: true, // Disable ripple effect for all buttons
+        disableRipple: true, // Disable ripple effect globally
       },
     },
   },

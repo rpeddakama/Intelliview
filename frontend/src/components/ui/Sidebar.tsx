@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Box,
   Divider,
   Drawer,
   List,
@@ -9,7 +10,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Home, Settings, History } from "@mui/icons-material";
+import { Home, Person, History } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import Logout from "../Logout";
 
@@ -39,40 +40,55 @@ const Sidebar: React.FC = () => {
         </Typography>
       </Toolbar>
       <Divider />
-      <List>
-        {[
-          { text: "Home", icon: <Home />, link: "/dashboard" },
-          { text: "Past Sessions", icon: <History />, link: "/temp-sessions" },
-          { text: "Settings", icon: <Settings />, link: "/settings" },
-        ].map((item) => (
-          <ListItem
-            button
-            component={Link}
-            to={item.link}
-            key={item.text}
-            sx={{
-              "&:hover": {
-                backgroundColor: "#444",
-                borderRadius: "10px",
-                "& .MuiListItemIcon-root": {
-                  color: "white",
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          justifyContent: "space-between",
+        }}
+      >
+        <List>
+          {[
+            { text: "Home", icon: <Home />, link: "/dashboard" },
+            {
+              text: "Past Sessions",
+              icon: <History />,
+              link: "/temp-sessions",
+            },
+            { text: "Profile", icon: <Person />, link: "/profile" },
+          ].map((item) => (
+            <ListItem
+              button
+              component={Link}
+              to={item.link}
+              key={item.text}
+              sx={{
+                "&:hover": {
+                  backgroundColor: "#444",
+                  borderRadius: "10px",
+                  "& .MuiListItemIcon-root": {
+                    color: "white",
+                  },
+                  "& .MuiListItemText-primary": {
+                    color: "white",
+                  },
                 },
-                "& .MuiListItemText-primary": {
-                  color: "white",
-                },
-              },
-              margin: "5px 10px",
-              padding: "10px 20px",
-            }}
-          >
-            <ListItemIcon sx={{ color: "inherit", minWidth: "40px" }}>
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText primary={item.text} sx={{ color: "inherit" }} />
-          </ListItem>
-        ))}
-        <Logout />
-      </List>
+                margin: "5px 10px",
+                padding: "10px 20px",
+              }}
+            >
+              <ListItemIcon sx={{ color: "inherit", minWidth: "40px" }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} sx={{ color: "inherit" }} />
+            </ListItem>
+          ))}
+        </List>
+        <Box sx={{ mb: 2 }}>
+          <Logout />
+        </Box>
+      </Box>
     </Drawer>
   );
 };

@@ -2,16 +2,18 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../axiosConfig";
 import {
   Box,
-  CssBaseline,
   Toolbar,
   Typography,
   List,
   ListItem,
   ListItemText,
-  Divider,
+  IconButton,
+  Grid,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./ui/Sidebar";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Recording {
   _id: string;
@@ -24,6 +26,7 @@ interface Recording {
 const PastSessions: React.FC = () => {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteId, setShowDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,9 +48,37 @@ const PastSessions: React.FC = () => {
     navigate(`/session/${id}`);
   };
 
+  const handleOptionsClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    id: string
+  ) => {
+    event.stopPropagation();
+    setShowDeleteId(id);
+  };
+
+  const handleDelete = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    id: string
+  ) => {
+    event.stopPropagation();
+    console.log(`Deleting session with id: ${id}`);
+    // Add delete logic here
+    setShowDeleteId(null);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date
+      .toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\//g, " - ");
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
-      <CssBaseline />
       <Sidebar />
       <Box
         component="main"
@@ -66,23 +97,61 @@ const PastSessions: React.FC = () => {
         </Typography>
         {error && <Typography color="error">{error}</Typography>}
         <List>
-          {recordings.map((recording, index) => (
+          {recordings.map((recording) => (
             <React.Fragment key={recording._id}>
               <ListItem
                 button
-                sx={{ bgcolor: "#333", mb: 1 }}
+                disableRipple
+                sx={{ bgcolor: "#333", mb: 1, borderRadius: 1 }}
                 onClick={() => handleSessionClick(recording._id)}
               >
-                <ListItemText
-                  primary={recording.question}
-                  secondary={new Date(recording.date).toLocaleString()}
-                  primaryTypographyProps={{ color: "white" }}
-                  secondaryTypographyProps={{ color: "gray" }}
-                />
+                <Grid container alignItems="center">
+                  <Grid item xs>
+                    <ListItemText
+                      primary={recording.question}
+                      primaryTypographyProps={{ color: "white" }}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="body2" color="#C3C3C3" sx={{ mr: 2 }}>
+                      {formatDate(recording.date)}
+                    </Typography>
+                  </Grid>
+                  <Grid item>
+                    {showDeleteId === recording._id ? (
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={(e) => handleDelete(e, recording._id)}
+                        sx={{
+                          color: "red",
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 0, 0, 0.08)",
+                            borderRadius: "50%",
+                          },
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    ) : (
+                      <IconButton
+                        edge="end"
+                        aria-label="options"
+                        onClick={(e) => handleOptionsClick(e, recording._id)}
+                        sx={{
+                          color: "#C3C3C3",
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.08)",
+                            borderRadius: "50%",
+                          },
+                        }}
+                      >
+                        <MoreHorizIcon />
+                      </IconButton>
+                    )}
+                  </Grid>
+                </Grid>
               </ListItem>
-              {index < recordings.length - 1 && (
-                <Divider sx={{ bgcolor: "#444" }} />
-              )}
             </React.Fragment>
           ))}
         </List>
