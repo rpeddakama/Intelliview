@@ -23,10 +23,10 @@ const SessionDetail: React.FC = () => {
         const response = await axiosInstance.get(`/api/sessions/${id}`);
         console.log("Received session data:", response.data);
         setSessionData(response.data);
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching session data:", err);
         setError("Failed to load session data");
+      } finally {
         setLoading(false);
       }
     };
@@ -34,46 +34,67 @@ const SessionDetail: React.FC = () => {
     fetchSessionData();
   }, [id]);
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
-  if (!sessionData) return <Typography>No data found</Typography>;
-
   return (
     <Box sx={{ display: "flex" }}>
       <Sidebar />
       <Box
         component="main"
-        sx={{ flexGrow: 1, bgcolor: "#1E1E1E", p: 3, color: "white" }}
+        sx={{
+          flexGrow: 1,
+          bgcolor: "#1E1E1E",
+          p: 3,
+          color: "white",
+          minHeight: "100vh",
+        }}
       >
-        <Typography variant="h4" gutterBottom>
-          {sessionData.question}
-        </Typography>
+        {loading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Typography color="error">{error}</Typography>
+        ) : sessionData ? (
+          <>
+            <Typography variant="h4" gutterBottom>
+              {sessionData.question}
+            </Typography>
 
-        <Typography variant="h6" gutterBottom>
-          Transcription
-        </Typography>
-        <Typography paragraph>{sessionData.transcription}</Typography>
+            <Typography variant="h6" gutterBottom>
+              Transcription
+            </Typography>
+            <Typography paragraph>{sessionData.transcription}</Typography>
 
-        <Typography variant="h6" gutterBottom>
-          Analysis
-        </Typography>
-        <Typography paragraph>{sessionData.analysis}</Typography>
+            <Typography variant="h6" gutterBottom>
+              Analysis
+            </Typography>
+            <Typography paragraph>{sessionData.analysis}</Typography>
 
-        <Typography variant="h6" gutterBottom>
-          Chat History
-        </Typography>
-        {sessionData.chatMessages && sessionData.chatMessages.length > 0 ? (
-          sessionData.chatMessages.map((message, index) => (
-            <Box key={index} sx={{ mb: 2 }}>
-              <Typography variant="subtitle1">{message.user}</Typography>
-              <Typography>{message.text}</Typography>
-              <Typography variant="caption">
-                {new Date(message.timestamp).toLocaleString()}
-              </Typography>
-            </Box>
-          ))
+            <Typography variant="h6" gutterBottom>
+              Chat History
+            </Typography>
+            {sessionData.chatMessages && sessionData.chatMessages.length > 0 ? (
+              sessionData.chatMessages.map((message, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Typography variant="subtitle1">{message.user}</Typography>
+                  <Typography>{message.text}</Typography>
+                  <Typography variant="caption">
+                    {new Date(message.timestamp).toLocaleString()}
+                  </Typography>
+                </Box>
+              ))
+            ) : (
+              <Typography>No chat messages for this session.</Typography>
+            )}
+          </>
         ) : (
-          <Typography>No chat messages for this session.</Typography>
+          <Typography>No data found</Typography>
         )}
       </Box>
     </Box>
