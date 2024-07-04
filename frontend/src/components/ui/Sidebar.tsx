@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Home, Person, History } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import Logout from "../Logout";
+import Logout from "./Logout";
 
 const Sidebar: React.FC = () => {
   const drawerWidth = 240;

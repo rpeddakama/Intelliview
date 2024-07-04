@@ -11,10 +11,18 @@ import axiosInstance from "../axiosConfig";
 import AudioRecorder from "./ui/Audio";
 import Chat from "./Chat";
 
+interface RecordingData {
+  id: string;
+  question: string;
+  transcription: string;
+  analysis: string;
+}
+
 const Recorder: React.FC = () => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [transcription, setTranscription] = useState<string | null>(null);
-  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [recordingData, setRecordingData] = useState<RecordingData | null>(
+    null
+  );
   const [question, setQuestion] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,8 +34,7 @@ const Recorder: React.FC = () => {
 
   const handleRestart = () => {
     setAudioBlob(null);
-    setTranscription(null);
-    setAnalysis(null);
+    setRecordingData(null);
     setError(null);
     setIsSubmitted(false);
   };
@@ -42,8 +49,8 @@ const Recorder: React.FC = () => {
       return;
     }
 
-    setIsSubmitted(true);
     setLoading(true);
+    setIsSubmitted(true);
     const formData = new FormData();
     formData.append("audio", audioBlob);
     formData.append("question", question);
@@ -54,15 +61,35 @@ const Recorder: React.FC = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      setTranscription(response.data.transcription);
-      setAnalysis(response.data.analysis);
+
+      console.log("Transcribe API response:", response.data);
+
+      if (!response.data || typeof response.data !== "object") {
+        throw new Error("Invalid response from server");
+      }
+
+      const { _id, transcription, analysis } = response.data;
+
+      if (!_id || !transcription || !analysis) {
+        console.error("Response data:", response.data);
+        throw new Error("Invalid data returned from server");
+      }
+
+      setRecordingData({
+        id: _id,
+        question: question,
+        transcription: transcription,
+        analysis: analysis,
+      });
       setError(null);
     } catch (error) {
       console.error("Error uploading audio:", error);
-      setError(
-        "Error uploading audio. Make sure your response is more than 10 seconds."
-      );
-      setIsSubmitted(false); // Reset isSubmitted if there's an error
+      if (error instanceof Error) {
+        setError(`Error: ${error.message}`);
+      } else {
+        setError("An unknown error occurred");
+      }
+      setIsSubmitted(false);
     } finally {
       setLoading(false);
     }
@@ -109,30 +136,30 @@ const Recorder: React.FC = () => {
             rows={4}
             variant="filled"
             fullWidth
-            disabled={isSubmitted} // Disable the TextField when submitted
+            disabled={isSubmitted}
             InputProps={{
               disableUnderline: true,
               style: {
                 color: "white",
-                backgroundColor: isSubmitted ? "#2A2A2A" : "#333", // Darken background when disabled
+                backgroundColor: isSubmitted ? "#2A2A2A" : "#333",
               },
             }}
             sx={{
               marginBottom: 2,
               "& .MuiFilledInput-root": {
-                backgroundColor: isSubmitted ? "#2A2A2A" : "#333", // Darken background when disabled
+                backgroundColor: isSubmitted ? "#2A2A2A" : "#333",
                 "&:hover": {
-                  backgroundColor: isSubmitted ? "#2A2A2A" : "#444", // Prevent hover effect when disabled
+                  backgroundColor: isSubmitted ? "#2A2A2A" : "#444",
                 },
                 "&.Mui-focused": {
                   backgroundColor: isSubmitted ? "#2A2A2A" : "#333",
                 },
               },
               "& .MuiInputBase-input": {
-                color: isSubmitted ? "#A0A0A0" : "white", // Slightly dim text when disabled
+                color: isSubmitted ? "#A0A0A0" : "white",
               },
               "& .Mui-disabled": {
-                WebkitTextFillColor: "#A0A0A0", // Override WebKit's default disabled text color
+                WebkitTextFillColor: "#A0A0A0",
               },
             }}
           />
@@ -158,12 +185,34 @@ const Recorder: React.FC = () => {
           </Typography>
         )}
         {loading && <CircularProgress sx={{ marginTop: 2 }} />}
-        {transcription && analysis && (
-          <Box sx={{ width: "100%", maxWidth: "600px" }}>
+        {recordingData && (
+          <Box sx={{ width: "100%", maxWidth: "600px", marginTop: 4 }}>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Recording ID: {recordingData.id}
+            </Typography>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Transcription:
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ marginBottom: 2, whiteSpace: "pre-wrap" }}
+            >
+              {recordingData.transcription}
+            </Typography>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Analysis:
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ marginBottom: 2, whiteSpace: "pre-wrap" }}
+            >
+              {recordingData.analysis}
+            </Typography>
             <Chat
-              question={question}
-              transcription={transcription}
-              analysis={analysis}
+              recordingId={recordingData.id}
+              question={recordingData.question}
+              transcription={recordingData.transcription}
+              analysis={recordingData.analysis}
             />
           </Box>
         )}

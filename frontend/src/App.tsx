@@ -15,6 +15,7 @@ import TempSessions from "./components/TempSessions";
 import SessionDetail from "./components/SessionDetail";
 import SignUpForm from "./components/helloworld";
 import { CssBaseline } from "@mui/material";
+import NotFound from "./components/NotFound";
 
 const App: React.FC = () => {
   return (
@@ -35,6 +36,7 @@ const App: React.FC = () => {
           />
           <Route path="register" element={<Register />} />
           <Route path="tempform" element={<TempForm />} />
+          <Route path="*" element={<NotFound />} />
           <Route element={<ProtectedRoutes />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />

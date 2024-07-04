@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import Note from "../models/Note";
 import Recording from "../models/Recording";
 import User from "../models/User";
+import ChatMessage from "../models/ChatMessage";
 
 const upload = multer();
 const router = Router();
@@ -29,14 +30,64 @@ router.get("/message", async (req, res) => {
   res.send("Hello from the API!");
 });
 
-router.post("/chat", async (req: Request, res: Response) => {
-  const { question, transcription, analysis, input } = req.body;
+router.get("/sessions/:id", async (req: Request, res: Response) => {
+  try {
+    const sessionId = req.params.id;
+    const recording = await Recording.findById(sessionId);
+    const chatMessages = await ChatMessage.find({ recordingId: sessionId });
 
-  if (!analysis || !transcription) {
-    return res.status(400).json({ error: "Message is required" });
+    console.log("Found chat messages:", chatMessages);
+
+    if (!recording) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    res.json({
+      question: recording.question,
+      transcription: recording.transcription,
+      analysis: recording.analysis,
+      chatMessages: chatMessages[0]?.messages || [],
+    });
+  } catch (error) {
+    console.error("Error fetching session data:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.post("/chat", async (req: Request, res: Response) => {
+  console.log("Received chat request with body:", req.body);
+
+  const { recordingId, question, transcription, analysis, input } = req.body;
+
+  if (!recordingId || !input) {
+    console.log(
+      "Missing required fields. recordingId:",
+      recordingId,
+      "input:",
+      input
+    );
+    return res
+      .status(400)
+      .json({ error: "RecordingId and input are required" });
   }
 
   try {
+    let chatMessage = await ChatMessage.findOne({ recordingId });
+
+    if (!chatMessage) {
+      chatMessage = new ChatMessage({
+        recordingId,
+        messages: [],
+      });
+    }
+
+    // Add user's message to the chat history
+    chatMessage.messages.push({
+      user: "You",
+      text: input,
+      timestamp: new Date(),
+    });
+
     const chatConfig = {
       method: "post",
       url: "https://api.openai.com/v1/chat/completions",
@@ -53,7 +104,10 @@ router.post("/chat", async (req: Request, res: Response) => {
             question: ${question}: ${transcription} and here is what the ai thought of the 
             response: ${analysis}. You should respond to additional questions to the best of your ability.`,
           },
-          { role: "user", content: input },
+          ...chatMessage.messages.map((msg) => ({
+            role: msg.user === "You" ? "user" : "assistant",
+            content: msg.text,
+          })),
         ],
         max_tokens: 500,
       }),
@@ -63,19 +117,57 @@ router.post("/chat", async (req: Request, res: Response) => {
 
     const reply = response.data.choices[0].message.content;
 
-    res.json({ reply });
+    chatMessage.messages.push({
+      user: "Maxview AI",
+      text: reply,
+      timestamp: new Date(),
+    });
+
+    await chatMessage.save();
+
+    console.log("Sending chat response:", {
+      reply,
+      messages: chatMessage.messages,
+    });
+    res.json({ reply, messages: chatMessage.messages });
   } catch (error) {
     console.error("Error communicating with OpenAI API:", error);
     res.status(500).json({ error: "Error communicating with OpenAI API" });
   }
 });
 
+router.get("/chat/:recordingId", async (req: Request, res: Response) => {
+  console.log(
+    "Fetching chat messages for recordingId:",
+    req.params.recordingId
+  );
+  try {
+    const chatMessage = await ChatMessage.findOne({
+      recordingId: req.params.recordingId,
+    });
+    if (!chatMessage) {
+      console.log(
+        "No chat messages found for recordingId:",
+        req.params.recordingId
+      );
+      return res.json({ messages: [] });
+    }
+    console.log("Sending chat messages:", chatMessage.messages);
+    res.json({ messages: chatMessage.messages });
+  } catch (error) {
+    console.error("Error fetching chat messages:", error);
+    res.status(500).json({ error: "Error fetching chat messages" });
+  }
+});
+
 router.post("/transcribe", upload.single("audio"), async (req, res) => {
+  console.log("Received transcribe request");
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
     if (!req.file) {
+      console.log("No file uploaded");
       return res.status(400).send("No file uploaded");
     }
 
@@ -83,6 +175,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
     if (
       !["audio/wav", "audio/mpeg", "audio/mp4", "audio/webm"].includes(fileType)
     ) {
+      console.log("Invalid file type:", fileType);
       return res.status(400).send("Invalid file type");
     }
 
@@ -104,8 +197,10 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       data: transcriptionFormData,
     };
 
+    console.log("Sending transcription request to OpenAI");
     const transcriptionResponse = await axios(transcriptionConfig);
     const transcription = transcriptionResponse.data;
+    console.log("Received transcription:", transcription);
 
     const analysisPrompt = `Analyze the following transcription of a response to the following behavioral interview question:
     ${req.body.question}. Assess the quality of the response, including the clarity, relevance, and completeness of the answer.
@@ -128,8 +223,10 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       }),
     };
 
+    console.log("Sending analysis request to OpenAI");
     const analysisResponse = await axios(analysisConfig);
     const analysis = analysisResponse.data.choices[0].message.content;
+    console.log("Received analysis:", analysis);
 
     // Create a new recording
     const newRecording = new Recording({
@@ -149,7 +246,16 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    res.json({ transcription: transcription.text, analysis: analysis });
+    console.log("Sending transcribe response:", {
+      _id: newRecording._id,
+      transcription: transcription.text,
+      analysis: analysis,
+    });
+    res.json({
+      _id: newRecording._id,
+      transcription: transcription.text,
+      analysis: analysis,
+    });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -159,12 +265,15 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
 });
 
 router.get("/recordings", async (req: Request, res: Response) => {
+  console.log("Fetching recordings for user");
   try {
     const user = (req as any).user;
     const userProfile = await User.findById(user._id).populate("recordings");
     if (!userProfile) {
+      console.log("User not found");
       return res.status(404).json({ message: "User not found" });
     }
+    console.log("Sending recordings:", userProfile.recordings);
     res.json(userProfile.recordings);
   } catch (error) {
     console.error("Error fetching recordings:", error);

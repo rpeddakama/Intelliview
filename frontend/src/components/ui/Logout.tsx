@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, CircularProgress } from "@mui/material";
-import axiosInstance from "../axiosConfig";
+import axiosInstance from "../../axiosConfig";
 
 const Logout: React.FC = () => {
   const navigate = useNavigate();

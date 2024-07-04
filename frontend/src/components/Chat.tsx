@@ -3,6 +3,7 @@ import { Box, TextField, Button, Typography, keyframes } from "@mui/material";
 import axiosInstance from "../axiosConfig";
 
 interface ChatProps {
+  recordingId: string;
   question: string;
   transcription: string;
   analysis: string;
@@ -11,6 +12,7 @@ interface ChatProps {
 interface Message {
   user: string;
   text: string;
+  timestamp: Date;
 }
 
 const typingAnimation = keyframes`
@@ -36,44 +38,73 @@ const TypingBubble = () => (
   </Box>
 );
 
-const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
+const Chat: React.FC<ChatProps> = ({
+  recordingId,
+  question,
+  transcription,
+  analysis,
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
   const [isWaitingForResponse, setIsWaitingForResponse] =
     useState<boolean>(false);
 
   useEffect(() => {
-    setMessages([{ user: "Maxview AI", text: analysis }]);
-  }, [analysis]);
+    const fetchChatMessages = async () => {
+      if (!recordingId) {
+        console.error("recordingId is undefined");
+        return;
+      }
+
+      try {
+        const response = await axiosInstance.get(`/api/chat/${recordingId}`);
+        console.log("Fetched chat messages:", response.data);
+        setMessages(response.data.messages);
+      } catch (error) {
+        console.error("Error fetching chat messages:", error);
+      }
+    };
+
+    fetchChatMessages();
+  }, [recordingId]);
 
   const handleSend = async () => {
-    if (input.trim() === "") return;
+    if (input.trim() === "" || !recordingId) return;
 
-    const newMessages: Message[] = [...messages, { user: "You", text: input }];
-    setMessages(newMessages);
-    setInput("");
     setIsWaitingForResponse(true);
 
-    try {
-      const response = await axiosInstance.post<{ reply: string }>(
-        "/api/chat",
-        {
-          question,
-          transcription,
-          analysis,
-          input,
-        }
-      );
+    console.log("Sending request with data:", {
+      recordingId,
+      question,
+      transcription,
+      analysis,
+      input,
+    });
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { user: "Maxview AI", text: response.data.reply },
-      ]);
+    try {
+      const response = await axiosInstance.post<{
+        reply: string;
+        messages: Message[];
+      }>("/api/chat", {
+        recordingId,
+        question,
+        transcription,
+        analysis,
+        input,
+      });
+
+      console.log("Received response:", response.data);
+      setMessages(response.data.messages);
+      setInput("");
     } catch (error) {
-      console.error("Error fetching chat response:", error);
+      console.error("Detailed error:", error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { user: "Maxview AI", text: "Error fetching response" },
+        {
+          user: "Maxview AI",
+          text: "Error fetching response. Please try again.",
+          timestamp: new Date(),
+        },
       ]);
     } finally {
       setIsWaitingForResponse(false);
@@ -147,12 +178,8 @@ const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
           variant="outlined"
           placeholder="Type your message..."
           value={input}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setInput(e.target.value)
-          }
-          onKeyPress={(e: React.KeyboardEvent) =>
-            e.key === "Enter" && handleSend()
-          }
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && handleSend()}
           disabled={isWaitingForResponse}
           sx={{
             "& .MuiOutlinedInput-root": {

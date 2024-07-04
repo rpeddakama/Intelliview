@@ -1,80 +1,79 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../axiosConfig";
-import { Box, CssBaseline, Toolbar, Typography, Divider } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import Sidebar from "./ui/Sidebar";
 
-interface Recording {
-  _id: string;
+interface SessionData {
   question: string;
   transcription: string;
   analysis: string;
-  date: string;
+  chatMessages: { user: string; text: string; timestamp: string }[];
 }
 
 const SessionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [recording, setRecording] = useState<Recording | null>(null);
+  const [sessionData, setSessionData] = useState<SessionData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchRecording = async () => {
+    const fetchSessionData = async () => {
       try {
-        const response = await axiosInstance.get(`/api/recordings/${id}`);
-        setRecording(response.data);
-        setError(null);
-      } catch (error) {
-        console.error("Error fetching recording:", error);
-        setError("Error fetching recording.");
+        const response = await axiosInstance.get(`/api/sessions/${id}`);
+        console.log("Received session data:", response.data);
+        setSessionData(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching session data:", err);
+        setError("Failed to load session data");
+        setLoading(false);
       }
     };
 
-    fetchRecording();
+    fetchSessionData();
   }, [id]);
+
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!sessionData) return <Typography>No data found</Typography>;
 
   return (
     <Box sx={{ display: "flex" }}>
-      <CssBaseline />
       <Sidebar />
       <Box
         component="main"
-        sx={{
-          flexGrow: 1,
-          bgcolor: "#1E1E1E",
-          p: 3,
-          color: "white",
-          height: "100vh",
-          overflow: "auto",
-        }}
+        sx={{ flexGrow: 1, bgcolor: "#1E1E1E", p: 3, color: "white" }}
       >
-        <Toolbar />
-        {error ? (
-          <Typography color="error">{error}</Typography>
+        <Typography variant="h4" gutterBottom>
+          {sessionData.question}
+        </Typography>
+
+        <Typography variant="h6" gutterBottom>
+          Transcription
+        </Typography>
+        <Typography paragraph>{sessionData.transcription}</Typography>
+
+        <Typography variant="h6" gutterBottom>
+          Analysis
+        </Typography>
+        <Typography paragraph>{sessionData.analysis}</Typography>
+
+        <Typography variant="h6" gutterBottom>
+          Chat History
+        </Typography>
+        {sessionData.chatMessages && sessionData.chatMessages.length > 0 ? (
+          sessionData.chatMessages.map((message, index) => (
+            <Box key={index} sx={{ mb: 2 }}>
+              <Typography variant="subtitle1">{message.user}</Typography>
+              <Typography>{message.text}</Typography>
+              <Typography variant="caption">
+                {new Date(message.timestamp).toLocaleString()}
+              </Typography>
+            </Box>
+          ))
         ) : (
-          recording && (
-            <>
-              <Typography variant="h5" gutterBottom>
-                Session Details
-              </Typography>
-              <Typography variant="h6">{recording.question}</Typography>
-              <Typography variant="body1" sx={{ mt: 2 }}>
-                <strong>Transcription:</strong>
-                <br />
-                {recording.transcription}
-              </Typography>
-              <Divider sx={{ my: 2, bgcolor: "#444" }} />
-              <Typography variant="body1">
-                <strong>Analysis:</strong>
-                <br />
-                {recording.analysis}
-              </Typography>
-              <Divider sx={{ my: 2, bgcolor: "#444" }} />
-              <Typography variant="body1" color="gray">
-                <strong>Date:</strong>{" "}
-                {new Date(recording.date).toLocaleString()}
-              </Typography>
-            </>
-          )
+          <Typography>No chat messages for this session.</Typography>
         )}
       </Box>
     </Box>
