@@ -54,7 +54,7 @@ const Sidebar: React.FC = () => {
             {
               text: "Past Sessions",
               icon: <History />,
-              link: "/temp-sessions",
+              link: "/past-sessions",
             },
             { text: "Profile", icon: <Person />, link: "/profile" },
           ].map((item) => (

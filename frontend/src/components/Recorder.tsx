@@ -131,12 +131,15 @@ const Recorder: React.FC = () => {
           <TextField
             placeholder="Enter interview question..."
             value={question}
-            onChange={(e) => setQuestion(e.target.value)}
+            onChange={(e) =>
+              e.target.value.length <= 300 ? setQuestion(e.target.value) : null
+            }
             multiline
             rows={4}
             variant="filled"
             fullWidth
             disabled={isSubmitted}
+            inputProps={{ maxLength: 300 }}
             InputProps={{
               disableUnderline: true,
               style: {

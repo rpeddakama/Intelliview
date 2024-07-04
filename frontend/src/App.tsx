@@ -10,8 +10,6 @@ import ProtectedRoutes from "./context/ProtectedRoutes";
 import Profile from "./components/Profile";
 import Recorder from "./components/Recorder";
 import PastSessions from "./components/PastSessions";
-import TempForm from "./components/tempForm";
-import TempSessions from "./components/TempSessions";
 import SessionDetail from "./components/SessionDetail";
 import SignUpForm from "./components/helloworld";
 import { CssBaseline } from "@mui/material";
@@ -35,14 +33,12 @@ const App: React.FC = () => {
             }
           />
           <Route path="register" element={<Register />} />
-          <Route path="tempform" element={<TempForm />} />
           <Route path="*" element={<NotFound />} />
           <Route element={<ProtectedRoutes />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="recorder" element={<Recorder />} />
             <Route path="past-sessions" element={<PastSessions />} />
-            <Route path="temp-sessions" element={<TempSessions />} />
             <Route path="/session/:id" element={<SessionDetail />} />
           </Route>
         </Routes>

@@ -281,4 +281,32 @@ router.get("/recordings", async (req: Request, res: Response) => {
   }
 });
 
+// Add this new route in api.ts
+router.delete("/recordings/:id", async (req: Request, res: Response) => {
+  try {
+    const recordingId = req.params.id;
+    const user = (req as any).user;
+
+    // Find and delete the recording
+    const deletedRecording = await Recording.findByIdAndDelete(recordingId);
+
+    if (!deletedRecording) {
+      return res.status(404).json({ message: "Recording not found" });
+    }
+
+    // Remove the recording from the user's recordings array
+    await User.findByIdAndUpdate(user._id, {
+      $pull: { recordings: recordingId },
+    });
+
+    // Delete associated chat messages
+    await ChatMessage.deleteOne({ recordingId });
+
+    res.json({ message: "Recording deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting recording:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;
