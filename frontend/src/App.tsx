@@ -6,7 +6,7 @@ import theme from "./theme/theme";
 import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import ProtectedRoutes from "./context/ProtectedRoutes";
+import ProtectedRoute from "./context/ProtectedRoute";
 import Profile from "./components/Profile";
 import Recorder from "./components/Recorder";
 import PastSessions from "./components/PastSessions";
@@ -34,7 +34,7 @@ const App: React.FC = () => {
           />
           <Route path="register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
-          <Route element={<ProtectedRoutes />}>
+          <Route element={<ProtectedRoute />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="recorder" element={<Recorder />} />

@@ -13,3 +13,11 @@ export const setAuthToken = (token: string | null) => {
 export const getAuthToken = () => localStorage.getItem("accessToken");
 
 export const isAuthenticated = () => !!getAuthToken();
+
+export const clearAuth = () => {
+  localStorage.removeItem("accessToken");
+  delete axiosInstance.defaults.headers.common["Authorization"];
+  // If you have any other auth-related data in localStorage, clear it here
+  // For example:
+  // localStorage.removeItem("user");
+};

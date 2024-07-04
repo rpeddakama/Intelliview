@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, CircularProgress } from "@mui/material";
 import axiosInstance from "../../axiosConfig";
+import { clearAuth } from "../../utils/auth";
 
 const Logout: React.FC = () => {
   const navigate = useNavigate();
@@ -10,18 +11,13 @@ const Logout: React.FC = () => {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      // Make a request to the server to invalidate the refresh token
       await axiosInstance.post("/auth/logout");
-
-      // Clear the access token from memory
-      axiosInstance.defaults.headers["Authorization"] = "";
-
+      clearAuth(); // This will clear the token from localStorage and axios headers
       setIsLoading(false);
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
-      // Even if there's an error, we should still clear the local auth state
-      axiosInstance.defaults.headers["Authorization"] = "";
+      clearAuth(); // Clear auth even if there's an error
       setIsLoading(false);
       navigate("/login");
     }
