@@ -22,33 +22,11 @@ const apiLimiter = rateLimit({
 });
 
 router.use(apiLimiter);
-
-// Secure routes
 router.use(authenticateToken);
 
-// Define routes
 router.get("/message", async (req, res) => {
   await new Promise((resolve) => setTimeout(resolve, 5000));
   res.send("Hello from the API!");
-});
-
-router.post("/notes", async (req, res) => {
-  try {
-    const userId = (req as any).user._id;
-    const { title, content } = req.body;
-
-    const note = new Note({
-      userId,
-      title,
-      content,
-    });
-
-    await note.save();
-    res.status(201).json({ message: "Note added successfully" });
-  } catch (error) {
-    console.error("Error adding note:", error);
-    res.status(500).json({ message: "Server error" });
-  }
 });
 
 router.post("/chat", async (req: Request, res: Response) => {
