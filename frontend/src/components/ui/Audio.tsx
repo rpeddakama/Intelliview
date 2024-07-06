@@ -14,6 +14,8 @@ interface AudioRecorderProps {
   onRestart: () => void;
   onSubmit: () => void;
   isSubmitted: boolean;
+  canRecord: boolean;
+  onStartRecording: () => Promise<void>;
 }
 
 const MAX_DURATION = 120;
@@ -23,6 +25,8 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
   onRestart,
   onSubmit,
   isSubmitted,
+  canRecord,
+  onStartRecording,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -36,7 +40,17 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const startRecording = () => {
+  const startRecording = async () => {
+    if (!canRecord) {
+      return;
+    }
+
+    await onStartRecording();
+
+    if (!canRecord) {
+      return;
+    }
+
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
@@ -252,6 +266,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
             startIcon={<MicIcon />}
             onClick={startRecording}
             fullWidth
+            disabled={!canRecord}
           >
             Start Recording
           </Button>

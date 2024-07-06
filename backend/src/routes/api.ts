@@ -40,7 +40,7 @@ router.get("/sessions/:id", async (req: Request, res: Response) => {
     const recording = await Recording.findById(sessionId);
     const chatMessages = await ChatMessage.find({ recordingId: sessionId });
 
-    console.log("Found chat messages:", chatMessages);
+    // console.log("Found chat messages:", chatMessages);
 
     if (!recording) {
       return res.status(404).json({ message: "Session not found" });
@@ -59,7 +59,7 @@ router.get("/sessions/:id", async (req: Request, res: Response) => {
 });
 
 router.post("/chat", async (req: Request, res: Response) => {
-  console.log("Received chat request with body:", req.body);
+  // console.log("Received chat request with body:", req.body);
 
   const { recordingId, question, transcription, analysis, input } = req.body;
 
@@ -77,9 +77,15 @@ router.post("/chat", async (req: Request, res: Response) => {
 
   try {
     const user = (req as any).user;
-    const canChat = await checkChatMessageLimit(user._id);
 
-    if (!canChat) {
+    // Atomically check and increment the chat message count
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id, totalChatMessagesCount: { $lt: 10 } },
+      { $inc: { totalChatMessagesCount: 1 } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
       return res
         .status(403)
         .json({ error: "Chat message limit reached", requiresUpgrade: true });
@@ -138,19 +144,51 @@ router.post("/chat", async (req: Request, res: Response) => {
 
     await chatMessage.save();
 
-    // Update user's chat message count
-    await User.findByIdAndUpdate(user._id, {
-      $inc: { totalChatMessagesCount: 1 },
-    });
-
     console.log("Sending chat response:", {
       reply,
       messages: chatMessage.messages,
     });
-    res.json({ reply, messages: chatMessage.messages });
-  } catch (error) {
-    console.error("Error communicating with OpenAI API:", error);
-    res.status(500).json({ error: "Error communicating with OpenAI API" });
+    res.json({
+      reply,
+      messages: chatMessage.messages,
+      remainingMessages: 10 - updatedUser.totalChatMessagesCount,
+    });
+  } catch (error: unknown) {
+    console.error("Error processing chat request:", error);
+
+    if (axios.isAxiosError(error)) {
+      // This type guard narrows 'error' to AxiosError
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error("OpenAI API error response:", error.response.data);
+        res.status(500).json({
+          error: "Error communicating with OpenAI API",
+          details: error.response.data,
+        });
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("No response received from OpenAI API");
+        res.status(500).json({ error: "No response received from OpenAI API" });
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error setting up request to OpenAI API:", error.message);
+        res
+          .status(500)
+          .json({ error: "Error setting up request to OpenAI API" });
+      }
+    } else if (error instanceof Error) {
+      // For other Error instances
+      console.error("Unexpected error:", error.message);
+      res.status(500).json({
+        error: "An unexpected error occurred",
+        message: error.message,
+      });
+    } else {
+      // For unknown error types
+      console.error("Unknown error occurred:", error);
+      res.status(500).json({ error: "An unknown error occurred" });
+    }
   }
 });
 
@@ -170,7 +208,7 @@ router.get("/chat/:recordingId", async (req: Request, res: Response) => {
       );
       return res.json({ messages: [] });
     }
-    console.log("Sending chat messages:", chatMessage.messages);
+    // console.log("Sending chat messages:", chatMessage.messages);
     res.json({ messages: chatMessage.messages });
   } catch (error) {
     console.error("Error fetching chat messages:", error);
@@ -185,19 +223,6 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
 
   try {
     const user = (req as any).user;
-    const canSubmit = await checkAudioSubmissionLimit(user._id);
-
-    if (!canSubmit) {
-      console.log("Audio submission limit reached for user:", user._id);
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(403)
-        .json({
-          error: "Audio submission limit reached",
-          requiresUpgrade: true,
-        });
-    }
 
     if (!req.file) {
       console.log("No file uploaded");
@@ -328,11 +353,9 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
         .json({ error: `Error processing audio file: ${error.message}` });
     } else {
       console.log("Sending unknown error response");
-      res
-        .status(500)
-        .json({
-          error: "An unknown error occurred while processing the audio file",
-        });
+      res.status(500).json({
+        error: "An unknown error occurred while processing the audio file",
+      });
     }
   }
 });
@@ -378,6 +401,43 @@ router.delete("/recordings/:id", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error deleting recording:", error);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/check-audio-limit", async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const canSubmit = await checkAudioSubmissionLimit(user._id);
+
+    if (!canSubmit) {
+      return res.status(403).json({
+        error: "Audio submission limit reached",
+        requiresUpgrade: true,
+      });
+    }
+
+    res.json({ canSubmit: true });
+  } catch (error) {
+    console.error("Error checking audio submission limit:", error);
+    res.status(500).json({ error: "Error checking audio submission limit" });
+  }
+});
+
+router.get("/check-chat-limit", async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const canChat = await checkChatMessageLimit(user._id);
+    const totalLimit = 10; // Or whatever your chat message limit is
+    const remainingMessages = canChat
+      ? Math.max(0, totalLimit - user.totalChatMessagesCount)
+      : 0;
+
+    res.json({
+      remainingMessages,
+    });
+  } catch (error) {
+    console.error("Error checking chat message limit:", error);
+    res.status(500).json({ error: "Error checking chat message limit" });
   }
 });
 

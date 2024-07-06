@@ -53,48 +53,46 @@ const Chat: React.FC<ChatProps> = ({
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
-  const [isWaitingForResponse, setIsWaitingForResponse] =
-    useState<boolean>(false);
-  const [chatLimitReached, setChatLimitReached] = useState<boolean>(false);
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
+  const [remainingMessages, setRemainingMessages] = useState<number | null>(
+    null
+  );
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchChatMessages = async () => {
-      if (!recordingId) {
-        console.error("recordingId is undefined");
-        return;
-      }
-
-      try {
-        const response = await axiosInstance.get(`/api/chat/${recordingId}`);
-        console.log("Fetched chat messages:", response.data);
-        setMessages(response.data.messages);
-      } catch (error) {
-        console.error("Error fetching chat messages:", error);
-      }
-    };
-
     fetchChatMessages();
+    checkChatLimit();
   }, [recordingId]);
 
+  const fetchChatMessages = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/chat/${recordingId}`);
+      setMessages(response.data.messages);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
+      setError("Failed to fetch chat messages. Please try again.");
+    }
+  };
+
+  const checkChatLimit = async () => {
+    try {
+      const response = await axiosInstance.get("/api/check-chat-limit");
+      console.log("Chat limit response:", response.data);
+      setRemainingMessages(response.data.remainingMessages);
+    } catch (error) {
+      console.error("Error checking chat limit:", error);
+      setError("Failed to check chat limit. Please try again.");
+    }
+  };
+
   const handleSend = async () => {
-    if (input.trim() === "" || !recordingId || chatLimitReached) return;
+    if (input.trim() === "" || !recordingId || remainingMessages === 0) return;
 
     setIsWaitingForResponse(true);
-
-    console.log("Sending request with data:", {
-      recordingId,
-      question,
-      transcription,
-      analysis,
-      input,
-    });
+    setError(null);
 
     try {
-      const response = await axiosInstance.post<{
-        reply: string;
-        messages: Message[];
-        requiresUpgrade?: boolean;
-      }>("/api/chat", {
+      const response = await axiosInstance.post("/api/chat", {
         recordingId,
         question,
         transcription,
@@ -102,29 +100,18 @@ const Chat: React.FC<ChatProps> = ({
         input,
       });
 
-      console.log("Received response:", response.data);
-
-      if (response.data.requiresUpgrade) {
-        setChatLimitReached(true);
-        return;
-      }
-
       setMessages(response.data.messages);
+      setRemainingMessages(response.data.remainingMessages);
       setInput("");
     } catch (error) {
-      console.error("Detailed error:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          user: "Maxview AI",
-          text: "Error fetching response. Please try again.",
-          timestamp: new Date(),
-        },
-      ]);
+      console.error("Error sending message:", error);
+      setError("Failed to send message. Please try again.");
     } finally {
       setIsWaitingForResponse(false);
     }
   };
+
+  const chatLimitReached = remainingMessages === 0;
 
   return (
     <Box
@@ -187,11 +174,25 @@ const Chat: React.FC<ChatProps> = ({
           </Box>
         )}
       </Box>
-      {chatLimitReached && (
-        <Alert severity="warning" sx={{ marginBottom: 2 }}>
-          You've reached the chat message limit.
+
+      {error && (
+        <Alert severity="error" sx={{ marginBottom: 2 }}>
+          {error}
         </Alert>
       )}
+
+      {chatLimitReached && (
+        <Alert severity="warning" sx={{ marginBottom: 2 }}>
+          You've reached the chat message limit. Please upgrade to continue.
+        </Alert>
+      )}
+
+      {remainingMessages !== null && !chatLimitReached && (
+        <Typography variant="body2" sx={{ marginBottom: 2 }}>
+          Remaining messages: {remainingMessages}
+        </Typography>
+      )}
+
       <Box sx={{ display: "flex" }}>
         <TextField
           fullWidth

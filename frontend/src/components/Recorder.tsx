@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   CssBaseline,
@@ -29,7 +29,29 @@ const Recorder: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submissionLimitReached, setSubmissionLimitReached] = useState(false);
+  const [canRecord, setCanRecord] = useState<boolean>(true);
+
+  useEffect(() => {
+    checkAudioLimit();
+  }, []);
+
+  const checkAudioLimit = async () => {
+    try {
+      const response = await axiosInstance.get("/api/check-audio-limit");
+      setCanRecord(response.data.canSubmit);
+      if (!response.data.canSubmit) {
+        setError(
+          "You've reached the limit for audio submissions. Please upgrade to continue."
+        );
+      } else {
+        setError(null);
+      }
+    } catch (error) {
+      console.error("Error checking audio limit:", error);
+      setCanRecord(false);
+      setError("An error occurred while checking the audio submission limit.");
+    }
+  };
 
   const handleRecordingComplete = (blob: Blob) => {
     setAudioBlob(blob);
@@ -40,6 +62,7 @@ const Recorder: React.FC = () => {
     setRecordingData(null);
     setError(null);
     setIsSubmitted(false);
+    checkAudioLimit();
   };
 
   const handleSubmit = async () => {
@@ -59,19 +82,15 @@ const Recorder: React.FC = () => {
     formData.append("question", question);
 
     try {
+      console.log("Sending request to /api/transcribe");
       const response = await axiosInstance.post("/api/transcribe", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      console.log("Transcribe API response:", response.data);
-
-      if (response.data.requiresUpgrade) {
-        setSubmissionLimitReached(true);
-        setError("You've reached the limit for audio submissions.");
-        return;
-      }
+      console.log("Received response from /api/transcribe:", response);
+      console.log("Response data:", response.data);
 
       if (
         !response.data ||
@@ -79,9 +98,11 @@ const Recorder: React.FC = () => {
         !response.data.transcription ||
         !response.data.analysis
       ) {
+        console.error("Invalid response data:", response.data);
         throw new Error("Invalid response data from server");
       }
 
+      console.log("Setting recording data");
       setRecordingData({
         id: response.data._id,
         question: question,
@@ -89,11 +110,13 @@ const Recorder: React.FC = () => {
         analysis: response.data.analysis,
       });
       setError(null);
+      console.log("Recording data set successfully");
     } catch (error) {
-      console.error("Error uploading audio:", error);
-      if (axios.isAxiosError(error) && error.response) {
+      console.error("Error in handleSubmit:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data);
         setError(
-          `Error: ${error.response.data.error || "An unknown error occurred"}`
+          `Error: ${error.response?.data?.error || "An unknown error occurred"}`
         );
       } else if (error instanceof Error) {
         setError(`Error: ${error.message}`);
@@ -149,7 +172,7 @@ const Recorder: React.FC = () => {
             rows={4}
             variant="filled"
             fullWidth
-            disabled={isSubmitted || submissionLimitReached}
+            disabled={isSubmitted}
             inputProps={{ maxLength: 300 }}
             InputProps={{
               disableUnderline: true,
@@ -184,9 +207,25 @@ const Recorder: React.FC = () => {
             onRestart={handleRestart}
             onSubmit={handleSubmit}
             isSubmitted={isSubmitted}
+            canRecord={canRecord}
+            onStartRecording={checkAudioLimit}
           />
         </Box>
-        {error && (
+        {error && !canRecord && (
+          <Alert
+            severity="warning"
+            sx={{
+              marginTop: 2,
+              width: "100%",
+              maxWidth: "600px",
+              textAlign: "center",
+            }}
+          >
+            You've reached the limit for audio submissions. Please upgrade to
+            continue.
+          </Alert>
+        )}
+        {error && canRecord && (
           <Typography
             sx={{
               color: "red",
@@ -199,14 +238,6 @@ const Recorder: React.FC = () => {
           </Typography>
         )}
         {loading && <CircularProgress sx={{ marginTop: 2 }} />}
-        {submissionLimitReached && (
-          <Alert
-            severity="warning"
-            sx={{ marginTop: 2, width: "100%", maxWidth: "600px" }}
-          >
-            You've reached the limit for audio submissions.
-          </Alert>
-        )}
         {recordingData && (
           <Box sx={{ width: "100%", maxWidth: "600px", marginTop: 4 }}>
             <Typography variant="h6" sx={{ marginBottom: 2 }}>
