@@ -7,11 +7,11 @@ import rateLimit from "express-rate-limit";
 
 import { authenticateToken } from "../middleware/auth";
 import {
+  apiLimiter,
   checkAudioSubmissionLimit,
   checkChatMessageLimit,
 } from "../middleware/middleware";
 import dotenv from "dotenv";
-import Note from "../models/Note";
 import Recording from "../models/Recording";
 import User from "../models/User";
 import ChatMessage from "../models/ChatMessage";
@@ -19,12 +19,6 @@ import ChatMessage from "../models/ChatMessage";
 const upload = multer();
 const router = Router();
 dotenv.config();
-
-// Rate limiting
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-});
 
 router.use(apiLimiter);
 router.use(authenticateToken);
