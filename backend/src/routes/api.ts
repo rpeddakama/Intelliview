@@ -435,4 +435,26 @@ router.get("/check-chat-limit", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/profile", async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const userProfile = await User.findById(user._id);
+    if (!userProfile) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      email: userProfile.email,
+      accountTier: userProfile.isPremium ? "Premium" : "Free",
+      recordingsUsed: userProfile.audioSubmissionsCount,
+      recordingsLimit: userProfile.isPremium ? Infinity : 5, // Assuming 5 for free tier
+      chatMessagesUsed: userProfile.totalChatMessagesCount,
+      chatMessagesLimit: userProfile.isPremium ? Infinity : 10, // Assuming 10 for free tier
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;
