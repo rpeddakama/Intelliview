@@ -6,6 +6,10 @@ import FormData from "form-data";
 import rateLimit from "express-rate-limit";
 
 import { authenticateToken } from "../middleware/auth";
+import {
+  checkAudioSubmissionLimit,
+  checkChatMessageLimit,
+} from "../middleware/middleware";
 import dotenv from "dotenv";
 import Note from "../models/Note";
 import Recording from "../models/Recording";
@@ -72,6 +76,15 @@ router.post("/chat", async (req: Request, res: Response) => {
   }
 
   try {
+    const user = (req as any).user;
+    const canChat = await checkChatMessageLimit(user._id);
+
+    if (!canChat) {
+      return res
+        .status(403)
+        .json({ error: "Chat message limit reached", requiresUpgrade: true });
+    }
+
     let chatMessage = await ChatMessage.findOne({ recordingId });
 
     if (!chatMessage) {
@@ -125,6 +138,11 @@ router.post("/chat", async (req: Request, res: Response) => {
 
     await chatMessage.save();
 
+    // Update user's chat message count
+    await User.findByIdAndUpdate(user._id, {
+      $inc: { totalChatMessagesCount: 1 },
+    });
+
     console.log("Sending chat response:", {
       reply,
       messages: chatMessage.messages,
@@ -166,9 +184,26 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
   session.startTransaction();
 
   try {
+    const user = (req as any).user;
+    const canSubmit = await checkAudioSubmissionLimit(user._id);
+
+    if (!canSubmit) {
+      console.log("Audio submission limit reached for user:", user._id);
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(403)
+        .json({
+          error: "Audio submission limit reached",
+          requiresUpgrade: true,
+        });
+    }
+
     if (!req.file) {
       console.log("No file uploaded");
-      return res.status(400).send("No file uploaded");
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "No file uploaded" });
     }
 
     const fileType = req.file.mimetype;
@@ -176,7 +211,9 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       !["audio/wav", "audio/mpeg", "audio/mp4", "audio/webm"].includes(fileType)
     ) {
       console.log("Invalid file type:", fileType);
-      return res.status(400).send("Invalid file type");
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid file type" });
     }
 
     // Transcription Step
@@ -201,6 +238,10 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
     const transcriptionResponse = await axios(transcriptionConfig);
     const transcription = transcriptionResponse.data;
     console.log("Received transcription:", transcription);
+
+    if (!transcription.text) {
+      throw new Error("Transcription text is empty");
+    }
 
     const analysisPrompt = `Analyze the following transcription of a response to the following behavioral interview question:
     ${req.body.question}. Assess the quality of the response, including the clarity, relevance, and completeness of the answer.
@@ -228,6 +269,10 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
     const analysis = analysisResponse.data.choices[0].message.content;
     console.log("Received analysis:", analysis);
 
+    if (!analysis) {
+      throw new Error("Analysis is empty");
+    }
+
     // Create a new recording
     const newRecording = new Recording({
       question: req.body.question,
@@ -239,28 +284,56 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
     await newRecording.save({ session });
 
     // Add the recording to user's profile
-    const user = (req as any).user;
     user.recordings.push(newRecording._id);
     await user.save({ session });
+
+    // Update user's audio submission count
+    await User.findByIdAndUpdate(
+      user._id,
+      { $inc: { audioSubmissionsCount: 1 } },
+      { session }
+    );
 
     await session.commitTransaction();
     session.endSession();
 
-    console.log("Sending transcribe response:", {
+    const responseData = {
       _id: newRecording._id,
       transcription: transcription.text,
       analysis: analysis,
-    });
-    res.json({
-      _id: newRecording._id,
-      transcription: transcription.text,
-      analysis: analysis,
-    });
+    };
+    console.log("Sending transcribe response:", JSON.stringify(responseData));
+    res.json(responseData);
+    console.log("Response sent successfully");
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("Error processing audio file:", error);
-    res.status(500).send("Error processing audio file");
+
+    try {
+      // Only abort the transaction if it hasn't been committed
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
+    } catch (abortError) {
+      console.error("Error aborting transaction:", abortError);
+    } finally {
+      session.endSession();
+    }
+
+    if (error instanceof Error) {
+      console.log("Sending error response:", {
+        error: `Error processing audio file: ${error.message}`,
+      });
+      res
+        .status(500)
+        .json({ error: `Error processing audio file: ${error.message}` });
+    } else {
+      console.log("Sending unknown error response");
+      res
+        .status(500)
+        .json({
+          error: "An unknown error occurred while processing the audio file",
+        });
+    }
   }
 });
 
@@ -281,7 +354,6 @@ router.get("/recordings", async (req: Request, res: Response) => {
   }
 });
 
-// Add this new route in api.ts
 router.delete("/recordings/:id", async (req: Request, res: Response) => {
   try {
     const recordingId = req.params.id;

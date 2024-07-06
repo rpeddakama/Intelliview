@@ -5,11 +5,13 @@ import {
   Typography,
   TextField,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 import Sidebar from "./ui/Sidebar";
 import axiosInstance from "../axiosConfig";
 import AudioRecorder from "./ui/Audio";
 import Chat from "./Chat";
+import axios from "axios";
 
 interface RecordingData {
   id: string;
@@ -27,6 +29,7 @@ const Recorder: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionLimitReached, setSubmissionLimitReached] = useState(false);
 
   const handleRecordingComplete = (blob: Blob) => {
     setAudioBlob(blob);
@@ -64,27 +67,35 @@ const Recorder: React.FC = () => {
 
       console.log("Transcribe API response:", response.data);
 
-      if (!response.data || typeof response.data !== "object") {
-        throw new Error("Invalid response from server");
+      if (response.data.requiresUpgrade) {
+        setSubmissionLimitReached(true);
+        setError("You've reached the limit for audio submissions.");
+        return;
       }
 
-      const { _id, transcription, analysis } = response.data;
-
-      if (!_id || !transcription || !analysis) {
-        console.error("Response data:", response.data);
-        throw new Error("Invalid data returned from server");
+      if (
+        !response.data ||
+        !response.data._id ||
+        !response.data.transcription ||
+        !response.data.analysis
+      ) {
+        throw new Error("Invalid response data from server");
       }
 
       setRecordingData({
-        id: _id,
+        id: response.data._id,
         question: question,
-        transcription: transcription,
-        analysis: analysis,
+        transcription: response.data.transcription,
+        analysis: response.data.analysis,
       });
       setError(null);
     } catch (error) {
       console.error("Error uploading audio:", error);
-      if (error instanceof Error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(
+          `Error: ${error.response.data.error || "An unknown error occurred"}`
+        );
+      } else if (error instanceof Error) {
         setError(`Error: ${error.message}`);
       } else {
         setError("An unknown error occurred");
@@ -138,7 +149,7 @@ const Recorder: React.FC = () => {
             rows={4}
             variant="filled"
             fullWidth
-            disabled={isSubmitted}
+            disabled={isSubmitted || submissionLimitReached}
             inputProps={{ maxLength: 300 }}
             InputProps={{
               disableUnderline: true,
@@ -188,11 +199,16 @@ const Recorder: React.FC = () => {
           </Typography>
         )}
         {loading && <CircularProgress sx={{ marginTop: 2 }} />}
+        {submissionLimitReached && (
+          <Alert
+            severity="warning"
+            sx={{ marginTop: 2, width: "100%", maxWidth: "600px" }}
+          >
+            You've reached the limit for audio submissions.
+          </Alert>
+        )}
         {recordingData && (
           <Box sx={{ width: "100%", maxWidth: "600px", marginTop: 4 }}>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>
-              Recording ID: {recordingData.id}
-            </Typography>
             <Typography variant="h6" sx={{ marginBottom: 2 }}>
               Transcription:
             </Typography>

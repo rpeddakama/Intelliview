@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Box, TextField, Button, Typography, keyframes } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  keyframes,
+} from "@mui/material";
 import axiosInstance from "../axiosConfig";
 
 interface ChatProps {
@@ -48,6 +55,7 @@ const Chat: React.FC<ChatProps> = ({
   const [input, setInput] = useState<string>("");
   const [isWaitingForResponse, setIsWaitingForResponse] =
     useState<boolean>(false);
+  const [chatLimitReached, setChatLimitReached] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchChatMessages = async () => {
@@ -69,7 +77,7 @@ const Chat: React.FC<ChatProps> = ({
   }, [recordingId]);
 
   const handleSend = async () => {
-    if (input.trim() === "" || !recordingId) return;
+    if (input.trim() === "" || !recordingId || chatLimitReached) return;
 
     setIsWaitingForResponse(true);
 
@@ -85,6 +93,7 @@ const Chat: React.FC<ChatProps> = ({
       const response = await axiosInstance.post<{
         reply: string;
         messages: Message[];
+        requiresUpgrade?: boolean;
       }>("/api/chat", {
         recordingId,
         question,
@@ -94,6 +103,12 @@ const Chat: React.FC<ChatProps> = ({
       });
 
       console.log("Received response:", response.data);
+
+      if (response.data.requiresUpgrade) {
+        setChatLimitReached(true);
+        return;
+      }
+
       setMessages(response.data.messages);
       setInput("");
     } catch (error) {
@@ -172,6 +187,11 @@ const Chat: React.FC<ChatProps> = ({
           </Box>
         )}
       </Box>
+      {chatLimitReached && (
+        <Alert severity="warning" sx={{ marginBottom: 2 }}>
+          You've reached the chat message limit.
+        </Alert>
+      )}
       <Box sx={{ display: "flex" }}>
         <TextField
           fullWidth
@@ -180,7 +200,7 @@ const Chat: React.FC<ChatProps> = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && handleSend()}
-          disabled={isWaitingForResponse}
+          disabled={isWaitingForResponse || chatLimitReached}
           sx={{
             "& .MuiOutlinedInput-root": {
               color: "white",
@@ -200,7 +220,7 @@ const Chat: React.FC<ChatProps> = ({
         <Button
           variant="contained"
           onClick={handleSend}
-          disabled={isWaitingForResponse}
+          disabled={isWaitingForResponse || chatLimitReached}
           sx={{
             marginLeft: "10px",
             backgroundColor: "#2a2a2a",
