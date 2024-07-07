@@ -14,6 +14,7 @@ import SessionDetail from "./components/SessionDetail";
 import SignUpForm from "./components/helloworld";
 import { CssBaseline } from "@mui/material";
 import NotFound from "./components/NotFound";
+import EmailVerification from "./components/EmailVerification";
 
 const App: React.FC = () => {
   return (
@@ -34,6 +35,7 @@ const App: React.FC = () => {
           />
           <Route path="register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
           <Route element={<ProtectedRoute />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />

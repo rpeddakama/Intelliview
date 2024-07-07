@@ -8,6 +8,8 @@ export interface IUser extends Document {
   audioSubmissionsCount: number;
   totalChatMessagesCount: number;
   isPremium: boolean;
+  isVerified: boolean;
+  verificationToken: string | null;
 }
 
 const UserSchema: Schema = new Schema({
@@ -17,6 +19,8 @@ const UserSchema: Schema = new Schema({
   audioSubmissionsCount: { type: Number, default: 0 },
   totalChatMessagesCount: { type: Number, default: 0 },
   isPremium: { type: Boolean, default: false },
+  isVerified: { type: Boolean, default: false },
+  verificationToken: { type: String, default: null },
 });
 
 const User = mongoose.model<IUser>("User", UserSchema);

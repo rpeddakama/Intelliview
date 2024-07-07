@@ -25,10 +25,19 @@ const Login: React.FC = () => {
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Error logging in:", error);
-      setError(
-        error.response?.data?.message ||
-          "Login failed. Please check your email and password."
-      );
+      if (
+        error.response?.data?.message ===
+        "Please verify your email before logging in"
+      ) {
+        setError(
+          "Please verify your email before logging in. Check your inbox for a verification link."
+        );
+      } else {
+        setError(
+          error.response?.data?.message ||
+            "Login failed. Please check your email and password."
+        );
+      }
     }
   };
 

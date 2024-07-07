@@ -1,21 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { Box, Typography, TextField, Button, Snackbar } from "@mui/material";
 import axiosInstance from "../axiosConfig";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSuccessMessage(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
     try {
-      await axiosInstance.post("/auth/register", { email, password });
-      alert("Registration successful. Please login.");
-    } catch (error) {
+      const response = await axiosInstance.post("/auth/register", {
+        email,
+        password,
+      });
+
+      setSuccessMessage(
+        "Registration successful! Please check your email to verify your account."
+      );
+      // Clear the form
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
       console.error("Error registering:", error);
+      setError(
+        error.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
     }
   };
 
@@ -106,6 +130,35 @@ const Register: React.FC = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
           sx={{
+            marginBottom: "16px",
+            "& .MuiFilledInput-root": {
+              backgroundColor: "#3A3A3A",
+              "&:hover": {
+                backgroundColor: "#444444",
+              },
+              "&.Mui-focused": {
+                backgroundColor: "#3A3A3A",
+              },
+            },
+            "& .MuiInputBase-input": {
+              color: "white",
+              padding: "12px 12px 12px",
+            },
+          }}
+          InputProps={{
+            disableUnderline: true,
+          }}
+        />
+
+        <TextField
+          fullWidth
+          variant="filled"
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          sx={{
             marginBottom: "24px",
             "& .MuiFilledInput-root": {
               backgroundColor: "#3A3A3A",
@@ -142,34 +195,9 @@ const Register: React.FC = () => {
             padding: "10px 0",
           }}
         >
-          Sign Up
+          Register
         </Button>
 
-        <Typography
-          variant="body2"
-          align="center"
-          sx={{ color: "#888888", marginBottom: "16px" }}
-        >
-          or
-        </Typography>
-
-        <Button
-          fullWidth
-          variant="outlined"
-          sx={{
-            borderColor: "#3A3A3A",
-            color: "white",
-            textTransform: "none",
-            marginBottom: "16px",
-            "&:hover": {
-              borderColor: "#4A4A4A",
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-            },
-            padding: "10px 0",
-          }}
-        >
-          Continue with Google
-        </Button>
         <Typography
           variant="body2"
           align="center"
@@ -186,10 +214,22 @@ const Register: React.FC = () => {
               minWidth: "auto",
             }}
           >
-            Login
+            Log in
           </Button>
         </Typography>
       </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        message={error}
+      />
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
+        onClose={() => setSuccessMessage(null)}
+        message={successMessage}
+      />
     </Box>
   );
 };
