@@ -36,7 +36,7 @@ const Sidebar: React.FC = () => {
     >
       <Toolbar sx={{ display: "flex", justifyContent: "flex-start", pl: 2 }}>
         <Typography variant="h6" noWrap component="div" sx={{ color: "white" }}>
-          Maxview AI
+          Intelliview
         </Typography>
       </Toolbar>
       <Divider />

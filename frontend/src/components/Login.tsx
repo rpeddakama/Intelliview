@@ -86,7 +86,7 @@ const Login: React.FC = () => {
               },
             }}
           >
-            Maxview AI
+            Intelliview
           </Typography>
         </Box>
 

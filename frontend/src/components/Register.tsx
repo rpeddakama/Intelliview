@@ -101,7 +101,7 @@ const Register: React.FC = () => {
               },
             }}
           >
-            Maxview AI
+            Intelliview
           </Typography>
         </Box>
 

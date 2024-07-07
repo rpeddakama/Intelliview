@@ -131,7 +131,7 @@ router.post("/chat", async (req: Request, res: Response) => {
     const reply = response.data.choices[0].message.content;
 
     chatMessage.messages.push({
-      user: "Maxview AI",
+      user: "Intelliview",
       text: reply,
       timestamp: new Date(),
     });

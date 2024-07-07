@@ -40,13 +40,13 @@ const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
 
       setMessages((prevMessages) => [
         ...prevMessages,
-        { user: "Maxview AI", text: response.data.reply },
+        { user: "Intelliview", text: response.data.reply },
       ]);
     } catch (error) {
       console.error("Error fetching chat response:", error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { user: "Maxview AI", text: "Error fetching response" },
+        { user: "Intelliview", text: "Error fetching response" },
       ]);
     } finally {
       setIsWaitingForResponse(false);
@@ -79,7 +79,7 @@ const Chat: React.FC<ChatProps> = ({ question, transcription, analysis }) => {
             marginRight: "10px",
           }}
         />
-        Maxview AI
+        Intelliview
       </Typography>
       <Box
         sx={{

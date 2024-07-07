@@ -105,7 +105,7 @@ const EmailVerification: React.FC = () => {
               },
             }}
           >
-            Maxview AI
+            Intelliview
           </Typography>
         </Box>
         {isLoading ? (

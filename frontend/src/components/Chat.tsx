@@ -139,7 +139,7 @@ const Chat: React.FC<ChatProps> = ({
             marginRight: "10px",
           }}
         />
-        Maxview AI
+        Intelliview
       </Typography>
       <Box
         sx={{
@@ -168,7 +168,7 @@ const Chat: React.FC<ChatProps> = ({
         {isWaitingForResponse && (
           <Box sx={{ marginBottom: 2 }}>
             <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-              Maxview AI:
+              Intelliview:
             </Typography>
             <TypingBubble />
           </Box>
