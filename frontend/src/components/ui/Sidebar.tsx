@@ -27,8 +27,8 @@ const Sidebar: React.FC = () => {
           boxSizing: "border-box",
           backgroundColor: "#2E2E2E",
           color: "white",
-          overflowX: "hidden", // Prevent horizontal scrollbar
-          overflowY: "auto", // Allow vertical scrollbar if needed
+          overflowX: "hidden",
+          overflowY: "auto",
         },
       }}
       variant="permanent"
@@ -85,7 +85,7 @@ const Sidebar: React.FC = () => {
             </ListItem>
           ))}
         </List>
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2, mx: "10px", px: "20px" }}>
           <Logout />
         </Box>
       </Box>
