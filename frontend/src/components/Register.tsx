@@ -11,10 +11,23 @@ const Register: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const validateEmail = (email: string): boolean => {
+    const allowedDomains = ["gmail.com", "yahoo.com", "outlook.com"];
+    const emailParts = email.split("@");
+    if (emailParts.length !== 2) return false;
+    const domain = emailParts[1].toLowerCase();
+    return allowedDomains.includes(domain) || domain.endsWith(".edu");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+
+    if (!validateEmail(email)) {
+      setError("Please use an email from a valid domain.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");

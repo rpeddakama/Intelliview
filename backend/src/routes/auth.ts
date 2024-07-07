@@ -16,9 +16,9 @@ const sendVerificationEmail = async (email: string, token: string) => {
 
   try {
     await resend.emails.send({
-      from: "Your App <onboarding@resend.dev>",
-      to: "rishi@intelliview.io",
-      subject: "Verify Your Email",
+      from: "rishi@intelliview.io",
+      to: email,
+      subject: "Thanks for signing up to Intelliview! Please verify your email",
       html: `Please click this link to verify your email: <a href="${verificationLink}">${verificationLink}</a>`,
     });
   } catch (error) {
