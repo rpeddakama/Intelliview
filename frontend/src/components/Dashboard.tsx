@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
         }}
       >
         <Toolbar />
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h5" gutterBottom>
           Home
         </Typography>
         <Typography variant="subtitle1" gutterBottom>

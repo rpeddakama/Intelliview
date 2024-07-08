@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Box,
+  Button,
   Divider,
   Drawer,
   List,
@@ -10,7 +11,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Home, Person, History } from "@mui/icons-material";
+import { Home, Person, History, Add } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import Logout from "./Logout";
 
@@ -48,43 +49,64 @@ const Sidebar: React.FC = () => {
           justifyContent: "space-between",
         }}
       >
-        <List>
-          {[
-            { text: "Home", icon: <Home />, link: "/dashboard" },
-            {
-              text: "Past Sessions",
-              icon: <History />,
-              link: "/past-sessions",
-            },
-            { text: "Profile", icon: <Person />, link: "/profile" },
-          ].map((item) => (
-            <ListItem
-              button
-              component={Link}
-              to={item.link}
-              key={item.text}
+        <Box>
+          <List>
+            {[
+              { text: "Home", icon: <Home />, link: "/dashboard" },
+              {
+                text: "Past Sessions",
+                icon: <History />,
+                link: "/past-sessions",
+              },
+              { text: "Profile", icon: <Person />, link: "/profile" },
+            ].map((item) => (
+              <ListItem
+                button
+                component={Link}
+                to={item.link}
+                key={item.text}
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "#444",
+                    borderRadius: "10px",
+                    "& .MuiListItemIcon-root": {
+                      color: "white",
+                    },
+                    "& .MuiListItemText-primary": {
+                      color: "white",
+                    },
+                  },
+                  margin: "5px 10px",
+                  padding: "10px 20px",
+                }}
+              >
+                <ListItemIcon sx={{ color: "inherit", minWidth: "40px" }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.text} sx={{ color: "inherit" }} />
+              </ListItem>
+            ))}
+          </List>
+          <Box sx={{ mx: "10px", px: "20px" }}>
+            <Button
+              variant="contained"
+              component="a"
+              href="https://buy.stripe.com/3cs4j6dHx2ZWcJacMM"
+              target="_blank"
+              startIcon={<Add />}
               sx={{
+                backgroundColor: "#623BFB",
+                color: "white",
                 "&:hover": {
-                  backgroundColor: "#444",
-                  borderRadius: "10px",
-                  "& .MuiListItemIcon-root": {
-                    color: "white",
-                  },
-                  "& .MuiListItemText-primary": {
-                    color: "white",
-                  },
+                  backgroundColor: "#623BFB",
                 },
-                margin: "5px 10px",
-                padding: "10px 20px",
+                textTransform: "none",
               }}
             >
-              <ListItemIcon sx={{ color: "inherit", minWidth: "40px" }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} sx={{ color: "inherit" }} />
-            </ListItem>
-          ))}
-        </List>
+              Upgrade to Pro
+            </Button>
+          </Box>
+        </Box>
         <Box sx={{ mb: 2, mx: "10px", px: "20px" }}>
           <Logout />
         </Box>

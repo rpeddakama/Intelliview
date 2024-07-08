@@ -31,8 +31,10 @@ const Logout: React.FC = () => {
       color="secondary"
       sx={{
         textTransform: "none",
-        fontWeight: "bold",
         backgroundColor: "#623BFB",
+        "&:hover": {
+          backgroundColor: "#623BFB",
+        },
       }}
     >
       {isLoading ? <CircularProgress size={24} color="inherit" /> : "Logout"}
