@@ -180,9 +180,16 @@ const ProfilePage: React.FC = () => {
             {profile.accountTier === "Free" && (
               <Box display="flex" justifyContent="center">
                 <Button
+                  component="a"
+                  href="https://billing.stripe.com/p/login/8wM3g54756nDg5W4gg"
+                  target="_blank"
                   variant="contained"
                   sx={{
-                    bgcolor: "#623BFB",
+                    backgroundColor: "#623BFB",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#623BFB",
+                    },
                   }}
                 >
                   Billing Portal

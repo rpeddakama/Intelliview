@@ -36,7 +36,12 @@ const Sidebar: React.FC = () => {
       anchor="left"
     >
       <Toolbar sx={{ display: "flex", justifyContent: "flex-start", pl: 2 }}>
-        <Typography variant="h6" noWrap component="div" sx={{ color: "white" }}>
+        <Typography
+          variant="h6"
+          noWrap
+          component="div"
+          sx={{ color: "white", ml: 1 }}
+        >
           Intelliview
         </Typography>
       </Toolbar>
