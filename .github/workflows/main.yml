@@ -1,0 +1,53 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install Dependencies
+      run: |
+        cd frontend
+        npm ci
+        cd ../backend
+        npm ci
+
+    - name: Build Frontend
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Run Tests
+      run: |
+        cd frontend
+        npm test
+        cd ../backend
+        npm test
+
+    - name: Deploy to EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+      run: |
+        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        scp -i private_key -o StrictHostKeyChecking=no -r frontend/build/* ${USER}@${HOST}:/home/ec2-user/app/frontend/build/
+        scp -i private_key -o StrictHostKeyChecking=no -r backend/* ${USER}@${HOST}:/home/ec2-user/app/backend/
+        ssh -i private_key -o StrictHostKeyChecking=no ${USER}@${HOST} '
+          cd /home/ec2-user/app/backend &&
+          npm install &&
+          pm2 restart all
+        '
