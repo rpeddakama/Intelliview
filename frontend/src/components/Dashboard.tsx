@@ -47,7 +47,6 @@ const Dashboard: React.FC = () => {
   const cardStyle = {
     backgroundColor: "#333",
     cursor: "pointer",
-    height: "100%",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -71,42 +70,63 @@ const Dashboard: React.FC = () => {
           color: "white",
           height: "100vh",
           overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Toolbar />
-        <Typography variant="h5" gutterBottom>
-          Home
-        </Typography>
-        <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
-          Improve your interview skills with industry-specific questions and
-          feedback. Or try your own!
-        </Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={cardStyle} onClick={() => handleCardClick(null)}>
-              <CardContent sx={{ textAlign: "center" }}>
-                <Add sx={{ fontSize: 40, mb: 2 }} />
-                <Typography variant="h6">Custom</Typography>
-              </CardContent>
-            </Card>
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Typography variant="h5" gutterBottom>
+            Home
+          </Typography>
+          <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
+            Improve your interview skills with industry-specific questions and
+            feedback. Or try your own!
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card sx={cardStyle} onClick={() => handleCardClick(null)}>
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Add sx={{ fontSize: 40, mb: 2 }} />
+                  <Typography variant="h6">Custom</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            {Object.entries(industryQuestions).map(
+              ([industry, data], index) => {
+                const IconComponent = iconMap[data.icon] || Add;
+                return (
+                  <Grid item xs={12} sm={6} md={3} key={index}>
+                    <Card
+                      sx={cardStyle}
+                      onClick={() => handleCardClick(industry)}
+                    >
+                      <CardContent sx={{ textAlign: "center" }}>
+                        <IconComponent sx={{ fontSize: 40, mb: 2 }} />
+                        <Typography variant="h6">
+                          {industry.charAt(0).toUpperCase() +
+                            industry.slice(1).replace("_", " ")}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              }
+            )}
           </Grid>
-          {Object.entries(industryQuestions).map(([industry, data], index) => {
-            const IconComponent = iconMap[data.icon] || Add;
-            return (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card sx={cardStyle} onClick={() => handleCardClick(industry)}>
-                  <CardContent sx={{ textAlign: "center" }}>
-                    <IconComponent sx={{ fontSize: 40, mb: 2 }} />
-                    <Typography variant="h6">
-                      {industry.charAt(0).toUpperCase() +
-                        industry.slice(1).replace("_", " ")}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            );
-          })}
-        </Grid>
+        </Box>
+        <Box
+          component="footer"
+          sx={{
+            mt: "auto",
+            py: 0,
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="body2" sx={{ color: "gray" }}>
+            Email rishi@intelliview.io for problems/suggestions
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
