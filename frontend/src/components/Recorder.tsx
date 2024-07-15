@@ -17,6 +17,17 @@ import axios from "axios";
 // Import the industry questions
 import industryQuestions from "../data/industryQuestions.json";
 
+// Define the type for our industryQuestions
+type IndustryQuestions = {
+  [key: string]: {
+    icon: string;
+    questions: string[];
+  };
+};
+
+// Assert the type of industryQuestions
+const typedIndustryQuestions = industryQuestions as IndustryQuestions;
+
 interface RecordingData {
   id: string;
   question: string;
@@ -48,14 +59,14 @@ const Recorder: React.FC = () => {
     checkAudioLimit();
     if (!isCustomQuestion && selectedIndustry) {
       const industrySpecificQuestions =
-        industryQuestions[selectedIndustry as keyof typeof industryQuestions];
+        typedIndustryQuestions[selectedIndustry].questions;
       const randomQuestion =
         industrySpecificQuestions[
           Math.floor(Math.random() * industrySpecificQuestions.length)
         ];
       setQuestion(randomQuestion);
     }
-  }, []);
+  }, [isCustomQuestion, selectedIndustry]);
 
   const checkAudioLimit = async () => {
     try {
@@ -87,7 +98,7 @@ const Recorder: React.FC = () => {
     checkAudioLimit();
     if (!isCustomQuestion && selectedIndustry) {
       const industrySpecificQuestions =
-        industryQuestions[selectedIndustry as keyof typeof industryQuestions];
+        typedIndustryQuestions[selectedIndustry].questions;
       const randomQuestion =
         industrySpecificQuestions[
           Math.floor(Math.random() * industrySpecificQuestions.length)

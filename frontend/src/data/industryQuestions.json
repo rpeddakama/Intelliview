@@ -1,17 +1,34 @@
 {
-  "Consulting": [
-    "Describe a time when you had to solve a complex problem for a client. What was your approach?",
-    "How would you go about estimating the market size for a new product?",
-    "Walk me through how you would structure an analysis for a company considering entering a new market."
-  ],
-  "Software Engineering": [
-    "Explain the concept of object-oriented programming and provide an example.",
-    "How would you design a scalable system for a social media platform?",
-    "Describe a challenging bug you've encountered and how you solved it."
-  ],
-  "Finance": [
-    "How would you value a company that has negative earnings?",
-    "Explain the difference between NPV and IRR. When would you use each?",
-    "Walk me through the three financial statements and how they are interconnected."
-  ]
+  "consulting": {
+    "icon": "BusinessCenter",
+    "questions": [
+      "Describe a time when you had to solve a complex problem for a client. What was your approach?",
+      "How would you go about estimating the market size for a new product?",
+      "Walk me through how you would structure an analysis for a company considering entering a new market."
+    ]
+  },
+  "SWE": {
+    "icon": "Code",
+    "questions": [
+      "Explain the concept of object-oriented programming and provide an example.",
+      "How would you design a scalable system for a social media platform?",
+      "Describe a challenging bug you've encountered and how you solved it."
+    ]
+  },
+  "finance": {
+    "icon": "AttachMoney",
+    "questions": [
+      "How would you value a company that has negative earnings?",
+      "Explain the difference between NPV and IRR. When would you use each?",
+      "Walk me through the three financial statements and how they are interconnected."
+    ]
+  },
+  "marketing": {
+    "icon": "Campaign",
+    "questions": [
+      "Describe a successful marketing campaign you've worked on. What made it effective?",
+      "How would you measure the ROI of a social media marketing campaign?",
+      "What strategies would you use to enter a new market with an existing product?"
+    ]
+  }
 }

@@ -8,12 +8,26 @@ import {
   CardContent,
   Grid,
 } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import {
+  Add,
+  BusinessCenter,
+  Code,
+  AttachMoney,
+  Campaign,
+} from "@mui/icons-material";
 import Sidebar from "./ui/Sidebar";
 import { useNavigate } from "react-router-dom";
 
 // Import the industry questions
 import industryQuestions from "../data/industryQuestions.json";
+
+// Icon mapping
+const iconMap: { [key: string]: React.ElementType } = {
+  BusinessCenter,
+  Code,
+  AttachMoney,
+  Campaign,
+};
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +42,20 @@ const Dashboard: React.FC = () => {
         state: { isCustomQuestion: false, selectedIndustry: industry },
       });
     }
+  };
+
+  const cardStyle = {
+    backgroundColor: "#333",
+    cursor: "pointer",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+    "&:hover": {
+      transform: "scale(1.05)",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+    },
   };
 
   return (
@@ -49,39 +77,35 @@ const Dashboard: React.FC = () => {
         <Typography variant="h5" gutterBottom>
           Home
         </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          Start from scratch or select an industry to get started!
+        <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
+          Improve your interview skills with industry-specific questions and
+          feedback. Or try your own!
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
-            <Card
-              sx={{ backgroundColor: "#333", cursor: "pointer" }}
-              onClick={() => handleCardClick(null)}
-            >
-              <CardContent>
-                <Typography sx={{ textAlign: "center" }}>
-                  <Add />
-                </Typography>
-                <Typography variant="h6" sx={{ textAlign: "center", mt: 2 }}>
-                  Start from scratch
-                </Typography>
+            <Card sx={cardStyle} onClick={() => handleCardClick(null)}>
+              <CardContent sx={{ textAlign: "center" }}>
+                <Add sx={{ fontSize: 40, mb: 2 }} />
+                <Typography variant="h6">Custom</Typography>
               </CardContent>
             </Card>
           </Grid>
-          {Object.keys(industryQuestions).map((industry, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card
-                sx={{ backgroundColor: "#333", cursor: "pointer" }}
-                onClick={() => handleCardClick(industry)}
-              >
-                <CardContent>
-                  <Typography variant="h6" sx={{ textAlign: "center", mt: 2 }}>
-                    {industry.charAt(0).toUpperCase() + industry.slice(1)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+          {Object.entries(industryQuestions).map(([industry, data], index) => {
+            const IconComponent = iconMap[data.icon] || Add;
+            return (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Card sx={cardStyle} onClick={() => handleCardClick(industry)}>
+                  <CardContent sx={{ textAlign: "center" }}>
+                    <IconComponent sx={{ fontSize: 40, mb: 2 }} />
+                    <Typography variant="h6">
+                      {industry.charAt(0).toUpperCase() +
+                        industry.slice(1).replace("_", " ")}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
     </Box>
