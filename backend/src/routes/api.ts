@@ -217,6 +217,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
 
   try {
     const user = (req as any).user;
+    const industry = req.body.industry || "general";
 
     if (!req.file) {
       console.log("No file uploaded");
@@ -262,9 +263,10 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       throw new Error("Transcription text is empty");
     }
 
-    const analysisPrompt = `Analyze the following transcription of a response to the following behavioral interview question:
-    ${req.body.question}. Assess the quality of the response, including the clarity, relevance, and completeness of the answer.
-    Make sure to end your response with "Feel free to ask me any clarifying questions!" Here is their answer:\n\n${transcription.text}.`;
+    const analysisPrompt = `Analyze the following transcription of a response to the following ${industry} interview question:
+    ${req.body.question}. Assess the quality of the response, including the clarity, relevance, and completeness of the answer. If the 
+    industry isn't "general", make sure to have industry-specific analysis. Finally, make sure to end your response with 
+    "Feel free to ask me any clarifying questions!" Here is their answer:\n\n${transcription.text}.`;
 
     const analysisConfig = {
       method: "post",
@@ -276,7 +278,10 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       data: JSON.stringify({
         model: "gpt-4",
         messages: [
-          { role: "system", content: "You are a helpful assistant." },
+          {
+            role: "system",
+            content: `You are a ${industry} interview assistant.`,
+          },
           { role: "user", content: analysisPrompt },
         ],
         max_tokens: 500,

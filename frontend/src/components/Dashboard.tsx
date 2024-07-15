@@ -9,16 +9,27 @@ import {
   Grid,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
-import MicrosoftIcon from "@mui/icons-material/Microsoft";
-import MetaIcon from "@mui/icons-material/Facebook";
-import StripeIcon from "@mui/icons-material/AccountBalanceWallet";
-import AmazonIcon from "@mui/icons-material/ShoppingCart";
-import AppleIcon from "@mui/icons-material/Apple";
-import SpotifyIcon from "@mui/icons-material/MusicNote";
-import SlackIcon from "@mui/icons-material/Chat";
 import Sidebar from "./ui/Sidebar";
+import { useNavigate } from "react-router-dom";
+
+// Import the industry questions
+import industryQuestions from "../data/industryQuestions.json";
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (industry: string | null) => {
+    if (industry === null) {
+      // Custom question
+      navigate("/recorder", { state: { isCustomQuestion: true } });
+    } else {
+      // Industry-specific question
+      navigate("/recorder", {
+        state: { isCustomQuestion: false, selectedIndustry: industry },
+      });
+    }
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -39,27 +50,33 @@ const Dashboard: React.FC = () => {
           Home
         </Typography>
         <Typography variant="subtitle1" gutterBottom>
-          Start from scratch or select a template below to get started!
+          Start from scratch or select an industry to get started!
         </Typography>
         <Grid container spacing={2}>
-          {[
-            { label: "Start from scratch", icon: <Add />, color: "#333" },
-            { label: "Microsoft", icon: <MicrosoftIcon />, color: "#333" },
-            { label: "Meta", icon: <MetaIcon />, color: "#333" },
-            { label: "Stripe", icon: <StripeIcon />, color: "#333" },
-            { label: "Amazon", icon: <AmazonIcon />, color: "#333" },
-            { label: "Apple", icon: <AppleIcon />, color: "#333" },
-            { label: "Spotify", icon: <SpotifyIcon />, color: "#333" },
-            { label: "Slack", icon: <SlackIcon />, color: "#333" },
-          ].map((item, index) => (
+          <Grid item xs={12} sm={6} md={3}>
+            <Card
+              sx={{ backgroundColor: "#333", cursor: "pointer" }}
+              onClick={() => handleCardClick(null)}
+            >
+              <CardContent>
+                <Typography sx={{ textAlign: "center" }}>
+                  <Add />
+                </Typography>
+                <Typography variant="h6" sx={{ textAlign: "center", mt: 2 }}>
+                  Start from scratch
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          {Object.keys(industryQuestions).map((industry, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ backgroundColor: item.color }}>
+              <Card
+                sx={{ backgroundColor: "#333", cursor: "pointer" }}
+                onClick={() => handleCardClick(industry)}
+              >
                 <CardContent>
-                  <Typography sx={{ textAlign: "center" }}>
-                    {item.icon}
-                  </Typography>
                   <Typography variant="h6" sx={{ textAlign: "center", mt: 2 }}>
-                    {item.label}
+                    {industry.charAt(0).toUpperCase() + industry.slice(1)}
                   </Typography>
                 </CardContent>
               </Card>

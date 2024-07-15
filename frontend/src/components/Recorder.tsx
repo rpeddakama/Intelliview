@@ -7,11 +7,15 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
+import { useLocation } from "react-router-dom";
 import Sidebar from "./ui/Sidebar";
 import axiosInstance from "../axiosConfig";
 import AudioRecorder from "./ui/Audio";
 import Chat from "./Chat";
 import axios from "axios";
+
+// Import the industry questions
+import industryQuestions from "../data/industryQuestions.json";
 
 interface RecordingData {
   id: string;
@@ -20,7 +24,16 @@ interface RecordingData {
   analysis: string;
 }
 
+interface LocationState {
+  isCustomQuestion: boolean;
+  selectedIndustry?: string;
+}
+
 const Recorder: React.FC = () => {
+  const location = useLocation();
+  const { isCustomQuestion, selectedIndustry } =
+    location.state as LocationState;
+
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [recordingData, setRecordingData] = useState<RecordingData | null>(
     null
@@ -33,6 +46,15 @@ const Recorder: React.FC = () => {
 
   useEffect(() => {
     checkAudioLimit();
+    if (!isCustomQuestion && selectedIndustry) {
+      const industrySpecificQuestions =
+        industryQuestions[selectedIndustry as keyof typeof industryQuestions];
+      const randomQuestion =
+        industrySpecificQuestions[
+          Math.floor(Math.random() * industrySpecificQuestions.length)
+        ];
+      setQuestion(randomQuestion);
+    }
   }, []);
 
   const checkAudioLimit = async () => {
@@ -63,6 +85,15 @@ const Recorder: React.FC = () => {
     setError(null);
     setIsSubmitted(false);
     checkAudioLimit();
+    if (!isCustomQuestion && selectedIndustry) {
+      const industrySpecificQuestions =
+        industryQuestions[selectedIndustry as keyof typeof industryQuestions];
+      const randomQuestion =
+        industrySpecificQuestions[
+          Math.floor(Math.random() * industrySpecificQuestions.length)
+        ];
+      setQuestion(randomQuestion);
+    }
   };
 
   const handleSubmit = async () => {
@@ -80,6 +111,7 @@ const Recorder: React.FC = () => {
     const formData = new FormData();
     formData.append("audio", audioBlob);
     formData.append("question", question);
+    formData.append("industry", selectedIndustry || "general");
 
     try {
       console.log("Sending request to /api/transcribe");
@@ -159,44 +191,55 @@ const Recorder: React.FC = () => {
             maxWidth: "600px",
           }}
         >
-          Practice with a custom interview question
+          {isCustomQuestion
+            ? "Practice with a custom interview question"
+            : `Practice ${selectedIndustry} interview question`}
         </Typography>
         <Box sx={{ width: "100%", maxWidth: "600px" }}>
           <TextField
-            placeholder="Enter interview question..."
+            placeholder={
+              isCustomQuestion
+                ? "Enter interview question..."
+                : "Industry-specific question"
+            }
             value={question}
             onChange={(e) =>
-              e.target.value.length <= 300 ? setQuestion(e.target.value) : null
+              isCustomQuestion && e.target.value.length <= 300
+                ? setQuestion(e.target.value)
+                : null
             }
             multiline
             rows={4}
             variant="filled"
             fullWidth
-            disabled={isSubmitted}
+            disabled={isSubmitted || !isCustomQuestion}
             inputProps={{ maxLength: 300 }}
             InputProps={{
               disableUnderline: true,
               style: {
                 color: "white",
-                backgroundColor: isSubmitted ? "#2A2A2A" : "#333",
               },
             }}
             sx={{
               marginBottom: 2,
               "& .MuiFilledInput-root": {
-                backgroundColor: isSubmitted ? "#2A2A2A" : "#333",
+                backgroundColor: "#333",
                 "&:hover": {
-                  backgroundColor: isSubmitted ? "#2A2A2A" : "#444",
+                  backgroundColor: "#444",
                 },
                 "&.Mui-focused": {
-                  backgroundColor: isSubmitted ? "#2A2A2A" : "#333",
+                  backgroundColor: "#333",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "#2A2A2A",
                 },
               },
               "& .MuiInputBase-input": {
-                color: isSubmitted ? "#A0A0A0" : "white",
+                color: "white",
               },
-              "& .Mui-disabled": {
-                WebkitTextFillColor: "#A0A0A0",
+              "& .MuiInputBase-input.Mui-disabled": {
+                WebkitTextFillColor: "#CCCCCC",
+                opacity: 0.7,
               },
             }}
           />
