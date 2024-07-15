@@ -14,6 +14,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 const corsOptions = {
   origin: process.env.CLIENT_URL,
   credentials: true,

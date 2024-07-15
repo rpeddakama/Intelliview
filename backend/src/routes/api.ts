@@ -15,6 +15,7 @@ import dotenv from "dotenv";
 import Recording from "../models/Recording";
 import User from "../models/User";
 import ChatMessage from "../models/ChatMessage";
+import appConfig from "../config/config";
 
 const upload = multer();
 const router = Router();
@@ -72,17 +73,21 @@ router.post("/chat", async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
 
-    // Atomically check and increment the chat message count
+    const chatLimit = user.isPremium
+      ? appConfig.limits.premiumUser.chatMessages
+      : appConfig.limits.freeUser.chatMessages;
+
     const updatedUser = await User.findOneAndUpdate(
-      { _id: user._id, totalChatMessagesCount: { $lt: 10 } },
+      { _id: user._id, totalChatMessagesCount: { $lt: chatLimit } },
       { $inc: { totalChatMessagesCount: 1 } },
       { new: true }
     );
 
     if (!updatedUser) {
-      return res
-        .status(403)
-        .json({ error: "Chat message limit reached", requiresUpgrade: true });
+      return res.status(403).json({
+        error: "Chat message limit reached",
+        requiresUpgrade: !user.isPremium,
+      });
     }
 
     let chatMessage = await ChatMessage.findOne({ recordingId });
@@ -145,7 +150,7 @@ router.post("/chat", async (req: Request, res: Response) => {
     res.json({
       reply,
       messages: chatMessage.messages,
-      remainingMessages: 10 - updatedUser.totalChatMessagesCount,
+      remainingMessages: chatLimit - updatedUser.totalChatMessagesCount,
     });
   } catch (error: unknown) {
     console.error("Error processing chat request:", error);
@@ -426,7 +431,9 @@ router.get("/check-chat-limit", async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const canChat = await checkChatMessageLimit(user._id);
-    const totalLimit = 10; // Or whatever your chat message limit is
+    const totalLimit = user.isPremium
+      ? appConfig.limits.premiumUser.chatMessages
+      : appConfig.limits.freeUser.chatMessages;
     const remainingMessages = canChat
       ? Math.max(0, totalLimit - user.totalChatMessagesCount)
       : 0;
@@ -448,13 +455,22 @@ router.get("/profile", async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // console.log(
+    //   userProfile.isPremium
+    //     ? appConfig.limits.premiumUser.audioSubmissions
+    //     : "poop"
+    // );
     res.json({
       email: userProfile.email,
       accountTier: userProfile.isPremium ? "Premium" : "Free",
       recordingsUsed: userProfile.audioSubmissionsCount,
-      recordingsLimit: userProfile.isPremium ? Infinity : 5, // Assuming 5 for free tier
+      recordingsLimit: userProfile.isPremium
+        ? appConfig.limits.premiumUser.audioSubmissions
+        : appConfig.limits.freeUser.audioSubmissions,
       chatMessagesUsed: userProfile.totalChatMessagesCount,
-      chatMessagesLimit: userProfile.isPremium ? Infinity : 10, // Assuming 10 for free tier
+      chatMessagesLimit: userProfile.isPremium
+        ? appConfig.limits.premiumUser.chatMessages
+        : appConfig.limits.freeUser.chatMessages,
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);

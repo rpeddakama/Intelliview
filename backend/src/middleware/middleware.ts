@@ -1,5 +1,6 @@
 import User from "../models/User";
 import rateLimit from "express-rate-limit";
+import appConfig from "../config/config";
 
 export const checkAudioSubmissionLimit = async (
   userId: string
@@ -7,7 +8,11 @@ export const checkAudioSubmissionLimit = async (
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
-  return user.audioSubmissionsCount < 3;
+  const limit = user.isPremium
+    ? appConfig.limits.premiumUser.audioSubmissions
+    : appConfig.limits.freeUser.audioSubmissions;
+
+  return user.audioSubmissionsCount < limit;
 };
 
 export const checkChatMessageLimit = async (
@@ -16,7 +21,11 @@ export const checkChatMessageLimit = async (
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
-  return user.totalChatMessagesCount < 10;
+  const limit = user.isPremium
+    ? appConfig.limits.premiumUser.chatMessages
+    : appConfig.limits.freeUser.chatMessages;
+
+  return user.totalChatMessagesCount < limit;
 };
 
 export const apiLimiter = rateLimit({
