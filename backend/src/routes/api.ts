@@ -455,11 +455,6 @@ router.get("/profile", async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // console.log(
-    //   userProfile.isPremium
-    //     ? appConfig.limits.premiumUser.audioSubmissions
-    //     : "poop"
-    // );
     res.json({
       email: userProfile.email,
       accountTier: userProfile.isPremium ? "Premium" : "Free",
