@@ -1,7 +1,7 @@
 const appConfig = {
   limits: {
     freeUser: {
-      audioSubmissions: 4,
+      audioSubmissions: 3,
       chatMessages: 10,
     },
     premiumUser: {
