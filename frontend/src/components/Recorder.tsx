@@ -6,6 +6,10 @@ import {
   TextField,
   CircularProgress,
   Alert,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import Sidebar from "./ui/Sidebar";
@@ -13,20 +17,6 @@ import axiosInstance from "../axiosConfig";
 import AudioRecorder from "./ui/Audio";
 import Chat from "./Chat";
 import axios from "axios";
-
-// Import the industry questions
-import industryQuestions from "../data/industryQuestions.json";
-
-// Define the type for our industryQuestions
-type IndustryQuestions = {
-  [key: string]: {
-    icon: string;
-    questions: string[];
-  };
-};
-
-// Assert the type of industryQuestions
-const typedIndustryQuestions = industryQuestions as IndustryQuestions;
 
 interface RecordingData {
   id: string;
@@ -38,11 +28,12 @@ interface RecordingData {
 interface LocationState {
   isCustomQuestion: boolean;
   selectedIndustry?: string;
+  questions?: string[];
 }
 
 const Recorder: React.FC = () => {
   const location = useLocation();
-  const { isCustomQuestion, selectedIndustry } =
+  const { isCustomQuestion, selectedIndustry, questions } =
     location.state as LocationState;
 
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -57,16 +48,10 @@ const Recorder: React.FC = () => {
 
   useEffect(() => {
     checkAudioLimit();
-    if (!isCustomQuestion && selectedIndustry) {
-      const industrySpecificQuestions =
-        typedIndustryQuestions[selectedIndustry].questions;
-      const randomQuestion =
-        industrySpecificQuestions[
-          Math.floor(Math.random() * industrySpecificQuestions.length)
-        ];
-      setQuestion(randomQuestion);
+    if (!isCustomQuestion && questions && questions.length > 0) {
+      setQuestion(questions[0]);
     }
-  }, [isCustomQuestion, selectedIndustry]);
+  }, [isCustomQuestion, questions]);
 
   const checkAudioLimit = async () => {
     try {
@@ -96,15 +81,6 @@ const Recorder: React.FC = () => {
     setError(null);
     setIsSubmitted(false);
     checkAudioLimit();
-    if (!isCustomQuestion && selectedIndustry) {
-      const industrySpecificQuestions =
-        typedIndustryQuestions[selectedIndustry].questions;
-      const randomQuestion =
-        industrySpecificQuestions[
-          Math.floor(Math.random() * industrySpecificQuestions.length)
-        ];
-      setQuestion(randomQuestion);
-    }
   };
 
   const handleSubmit = async () => {
@@ -125,15 +101,11 @@ const Recorder: React.FC = () => {
     formData.append("industry", selectedIndustry || "general");
 
     try {
-      console.log("Sending request to /api/transcribe");
       const response = await axiosInstance.post("/api/transcribe", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      console.log("Received response from /api/transcribe:", response);
-      console.log("Response data:", response.data);
 
       if (
         !response.data ||
@@ -141,11 +113,9 @@ const Recorder: React.FC = () => {
         !response.data.transcription ||
         !response.data.analysis
       ) {
-        console.error("Invalid response data:", response.data);
         throw new Error("Invalid response data from server");
       }
 
-      console.log("Setting recording data");
       setRecordingData({
         id: response.data._id,
         question: question,
@@ -153,11 +123,9 @@ const Recorder: React.FC = () => {
         analysis: response.data.analysis,
       });
       setError(null);
-      console.log("Recording data set successfully");
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.response?.data);
         setError(
           `Error: ${error.response?.data?.error || "An unknown error occurred"}`
         );
@@ -207,53 +175,115 @@ const Recorder: React.FC = () => {
             : `Practice ${selectedIndustry} interview question`}
         </Typography>
         <Box sx={{ width: "100%", maxWidth: "600px" }}>
-          <TextField
-            placeholder={
-              isCustomQuestion
-                ? "Enter interview question..."
-                : "Industry-specific question"
-            }
-            value={question}
-            onChange={(e) =>
-              isCustomQuestion && e.target.value.length <= 300
-                ? setQuestion(e.target.value)
-                : null
-            }
-            multiline
-            rows={4}
-            variant="filled"
-            fullWidth
-            disabled={isSubmitted || !isCustomQuestion}
-            inputProps={{ maxLength: 300 }}
-            InputProps={{
-              disableUnderline: true,
-              style: {
-                color: "white",
-              },
-            }}
-            sx={{
-              marginBottom: 2,
-              "& .MuiFilledInput-root": {
-                backgroundColor: "#333",
-                "&:hover": {
-                  backgroundColor: "#444",
-                },
-                "&.Mui-focused": {
+          {isCustomQuestion ? (
+            <TextField
+              placeholder="Enter interview question..."
+              value={question}
+              onChange={(e) =>
+                e.target.value.length <= 300
+                  ? setQuestion(e.target.value)
+                  : null
+              }
+              multiline
+              rows={4}
+              variant="filled"
+              fullWidth
+              disabled={isSubmitted}
+              inputProps={{ maxLength: 300 }}
+              InputProps={{
+                disableUnderline: true,
+                style: { color: "white" },
+              }}
+              sx={{
+                marginBottom: 2,
+                "& .MuiFilledInput-root": {
                   backgroundColor: "#333",
+                  "&:hover": { backgroundColor: "#444" },
+                  "&.Mui-focused": { backgroundColor: "#333" },
+                  "&.Mui-disabled": { backgroundColor: "#2A2A2A" },
                 },
-                "&.Mui-disabled": {
-                  backgroundColor: "#2A2A2A",
+                "& .MuiInputBase-input": { color: "white" },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  WebkitTextFillColor: "#CCCCCC",
+                  opacity: 0.7,
                 },
-              },
-              "& .MuiInputBase-input": {
-                color: "white",
-              },
-              "& .MuiInputBase-input.Mui-disabled": {
-                WebkitTextFillColor: "#CCCCCC",
-                opacity: 0.7,
-              },
-            }}
-          />
+              }}
+            />
+          ) : (
+            <FormControl
+              fullWidth
+              variant="filled"
+              sx={{
+                marginBottom: 2,
+                "& .MuiFilledInput-underline:after": {
+                  borderBottomColor: "#623BFB",
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#623BFB",
+                },
+                "& .MuiInputLabel-root.Mui-disabled": {
+                  color: "rgba(255, 255, 255, 0.5)",
+                },
+              }}
+            >
+              <InputLabel id="question-select-label" sx={{ color: "white" }}>
+                Select a question
+              </InputLabel>
+              <Select
+                labelId="question-select-label"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                disabled={isSubmitted}
+                sx={{
+                  color: "white",
+                  "& .MuiFilledInput-root": {
+                    backgroundColor: "#333",
+                    "&:hover": { backgroundColor: "#444" },
+                    "&.Mui-focused": { backgroundColor: "#333" },
+                  },
+                  "& .MuiSelect-icon": { color: "white" },
+                  "&.Mui-focused .MuiSelect-icon": { color: "#623BFB" },
+                  "&.Mui-disabled": {
+                    color: "white",
+                    opacity: 0.7,
+                    "-webkit-text-fill-color": "white",
+                  },
+                  "& .MuiSelect-select.Mui-disabled": {
+                    color: "white",
+                    opacity: 0.7,
+                    "-webkit-text-fill-color": "white",
+                  },
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 48 * 4.5 + 8,
+                      width: "auto",
+                      maxWidth: "600px",
+                    },
+                  },
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                }}
+              >
+                {questions?.map((q, index) => (
+                  <MenuItem
+                    key={index}
+                    value={q}
+                    sx={{ whiteSpace: "normal", wordBreak: "break-word" }}
+                  >
+                    {q}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Box>
         <Box sx={{ width: "100%", maxWidth: "600px" }}>
           <AudioRecorder

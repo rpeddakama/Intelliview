@@ -64,7 +64,13 @@ const Sidebar: React.FC = () => {
       );
 
       if (response.data.stripeCustomerId) {
-        window.location.href = "https://buy.stripe.com/test_eVacNYcyo9oogUwaEE";
+        const stripeUrl = new URL(
+          "https://buy.stripe.com/test_eVacNYcyo9oogUwaEE"
+        );
+        if (profile && profile.email) {
+          stripeUrl.searchParams.append("prefilled_email", profile.email);
+        }
+        window.location.href = stripeUrl.toString();
       } else {
         console.error("Failed to create Stripe customer");
       }

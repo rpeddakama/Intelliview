@@ -14,19 +14,36 @@ import {
   Code,
   AttachMoney,
   Campaign,
+  Inventory,
+  AccountBalance,
+  Help,
 } from "@mui/icons-material";
 import Sidebar from "./ui/Sidebar";
 import { useNavigate } from "react-router-dom";
 
-// Import the industry questions
 import industryQuestions from "../data/industryQuestions.json";
 
-// Icon mapping
+// Define the structure of our industryQuestions
+type IndustryData = {
+  icon: string;
+  questions: string[];
+};
+
+type IndustryQuestions = {
+  [key: string]: IndustryData;
+};
+
+// Assert the type of industryQuestions
+const typedIndustryQuestions: IndustryQuestions = industryQuestions;
+
 const iconMap: { [key: string]: React.ElementType } = {
   BusinessCenter,
   Code,
   AttachMoney,
   Campaign,
+  Inventory,
+  AccountBalance,
+  Help,
 };
 
 const Dashboard: React.FC = () => {
@@ -34,13 +51,17 @@ const Dashboard: React.FC = () => {
 
   const handleCardClick = (industry: string | null) => {
     if (industry === null) {
-      // Custom question
       navigate("/recorder", { state: { isCustomQuestion: true } });
-    } else {
-      // Industry-specific question
+    } else if (industry in typedIndustryQuestions) {
       navigate("/recorder", {
-        state: { isCustomQuestion: false, selectedIndustry: industry },
+        state: {
+          isCustomQuestion: false,
+          selectedIndustry: industry,
+          questions: typedIndustryQuestions[industry].questions,
+        },
       });
+    } else {
+      console.error(`Invalid industry: ${industry}`);
     }
   };
 
@@ -92,7 +113,7 @@ const Dashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </Grid>
-            {Object.entries(industryQuestions).map(
+            {Object.entries(typedIndustryQuestions).map(
               ([industry, data], index) => {
                 const IconComponent = iconMap[data.icon] || Add;
                 return (
