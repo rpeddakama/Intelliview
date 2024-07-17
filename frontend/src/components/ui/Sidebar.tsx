@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -9,14 +9,69 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
-  Typography,
 } from "@mui/material";
 import { Home, Person, History, Add } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import Logout from "./Logout";
+import axiosInstance from "../../axiosConfig";
+import Logo from "../ui/Logo";
+
+interface UserProfile {
+  email: string;
+  accountTier: string;
+  recordingsUsed: number;
+  recordingsLimit: number;
+  chatMessagesUsed: number;
+  chatMessagesLimit: number;
+  isPremium: boolean;
+}
 
 const Sidebar: React.FC = () => {
   const drawerWidth = 240;
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchProfile = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.get("/api/profile");
+      setProfile(response.data);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setError("Error fetching profile. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handleUpgradeClick = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    try {
+      const response = await axiosInstance.post(
+        "/stripe/create-stripe-customer",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.data.stripeCustomerId) {
+        window.location.href = "https://buy.stripe.com/test_eVacNYcyo9oogUwaEE";
+      } else {
+        console.error("Failed to create Stripe customer");
+      }
+    } catch (error) {
+      console.error("Error creating Stripe customer:", error);
+    }
+  };
 
   return (
     <Drawer
@@ -35,15 +90,10 @@ const Sidebar: React.FC = () => {
       variant="permanent"
       anchor="left"
     >
-      <Toolbar sx={{ display: "flex", justifyContent: "flex-start", pl: 2 }}>
-        <Typography
-          variant="h6"
-          noWrap
-          component="div"
-          sx={{ color: "white", ml: 1 }}
-        >
-          Intelliview
-        </Typography>
+      <Toolbar
+        sx={{ display: "flex", alignItems: "center", pl: 2, py: 1, ml: 1 }}
+      >
+        <Logo width={120} height={28} />
       </Toolbar>
       <Divider />
       <Box
@@ -92,25 +142,25 @@ const Sidebar: React.FC = () => {
               </ListItem>
             ))}
           </List>
-          <Box sx={{ mx: "10px", px: "20px" }}>
-            <Button
-              variant="contained"
-              component="a"
-              href="https://buy.stripe.com/3cs4j6dHx2ZWcJacMM"
-              target="_blank"
-              startIcon={<Add />}
-              sx={{
-                backgroundColor: "#623BFB",
-                color: "white",
-                "&:hover": {
+          {!isLoading && profile && !profile.isPremium && (
+            <Box sx={{ mx: "10px", px: "20px" }}>
+              <Button
+                variant="contained"
+                onClick={handleUpgradeClick}
+                startIcon={<Add />}
+                sx={{
                   backgroundColor: "#623BFB",
-                },
-                textTransform: "none",
-              }}
-            >
-              Upgrade to Pro
-            </Button>
-          </Box>
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "#623BFB",
+                  },
+                  textTransform: "none",
+                }}
+              >
+                Upgrade to Pro
+              </Button>
+            </Box>
+          )}
         </Box>
         <Box sx={{ mb: 2, mx: "10px", px: "20px" }}>
           <Logout />

@@ -21,6 +21,7 @@ interface UserProfile {
   recordingsLimit: number;
   chatMessagesUsed: number;
   chatMessagesLimit: number;
+  isPremium: boolean;
 }
 
 const ProfilePage: React.FC = () => {
@@ -110,7 +111,7 @@ const ProfilePage: React.FC = () => {
                   </Box>
                   <Typography variant="h5" color="white">
                     {profile.recordingsUsed} /{" "}
-                    {profile.recordingsLimit === Infinity
+                    {profile.recordingsLimit === null
                       ? "∞"
                       : profile.recordingsLimit}
                   </Typography>
@@ -119,7 +120,7 @@ const ProfilePage: React.FC = () => {
                   variant="determinate"
                   value={
                     (profile.recordingsUsed /
-                      (profile.recordingsLimit === Infinity
+                      (profile.recordingsLimit === null
                         ? profile.recordingsUsed + 1
                         : profile.recordingsLimit)) *
                     100
@@ -150,7 +151,7 @@ const ProfilePage: React.FC = () => {
                   </Box>
                   <Typography variant="h5" color="white">
                     {profile.chatMessagesUsed} /{" "}
-                    {profile.chatMessagesLimit === Infinity
+                    {profile.chatMessagesLimit === null
                       ? "∞"
                       : profile.chatMessagesLimit}
                   </Typography>
@@ -159,7 +160,7 @@ const ProfilePage: React.FC = () => {
                   variant="determinate"
                   value={
                     (profile.chatMessagesUsed /
-                      (profile.chatMessagesLimit === Infinity
+                      (profile.chatMessagesLimit === null
                         ? profile.chatMessagesUsed + 1
                         : profile.chatMessagesLimit)) *
                     100
@@ -177,25 +178,23 @@ const ProfilePage: React.FC = () => {
               </Box>
             </Box>
 
-            {profile.accountTier === "Free" && (
-              <Box display="flex" justifyContent="center">
-                <Button
-                  component="a"
-                  href="https://billing.stripe.com/p/login/8wM3g54756nDg5W4gg"
-                  target="_blank"
-                  variant="contained"
-                  sx={{
+            <Box display="flex" justifyContent="center">
+              <Button
+                component="a"
+                href="https://billing.stripe.com/p/login/8wM3g54756nDg5W4gg"
+                target="_blank"
+                variant="contained"
+                sx={{
+                  backgroundColor: "#623BFB",
+                  color: "white",
+                  "&:hover": {
                     backgroundColor: "#623BFB",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#623BFB",
-                    },
-                  }}
-                >
-                  Billing Portal
-                </Button>
-              </Box>
-            )}
+                  },
+                }}
+              >
+                Billing Portal
+              </Button>
+            </Box>
           </Box>
         )}
       </Box>

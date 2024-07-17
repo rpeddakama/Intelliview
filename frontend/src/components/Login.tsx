@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Typography, TextField, Button, Snackbar } from "@mui/material";
 import axiosInstance from "../axiosConfig";
 import { setAuthToken } from "../utils/auth";
+import Logo from "../components/ui/Logo";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -67,27 +68,11 @@ const Login: React.FC = () => {
           sx={{
             display: "flex",
             justifyContent: "center",
+            alignItems: "center",
             marginBottom: "24px",
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{
-              color: "white",
-              display: "flex",
-              alignItems: "center",
-              "&::before": {
-                content: '""',
-                width: "12px",
-                height: "12px",
-                backgroundColor: "#8B5CF6",
-                borderRadius: "50%",
-                marginRight: "8px",
-              },
-            }}
-          >
-            Intelliview
-          </Typography>
+          <Logo width={126} height={30} />
         </Box>
 
         <TextField
