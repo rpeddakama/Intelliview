@@ -5,24 +5,64 @@ import axiosInstance from "../axiosConfig";
 import { setAuthToken } from "../utils/auth";
 import Logo from "../components/ui/Logo";
 
+interface UserProfile {
+  email: string;
+  accountTier: string;
+  isPremium: boolean;
+  subscriptionStatus: string;
+  subscriptionEndDate: string | null;
+  cancelAtPeriodEnd: boolean;
+}
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setMessage(null);
 
     try {
-      const response = await axiosInstance.post("/auth/login", {
+      // Login
+      const loginResponse = await axiosInstance.post("/auth/login", {
         email,
         password,
       });
 
-      const { accessToken } = response.data;
+      const { accessToken } = loginResponse.data;
       setAuthToken(accessToken);
+
+      // Fetch user profile
+      const profileResponse = await axiosInstance.get<UserProfile>(
+        "/api/profile"
+      );
+      const userProfile = profileResponse.data;
+
+      // Check subscription status
+      if (userProfile.isPremium) {
+        if (userProfile.cancelAtPeriodEnd) {
+          const endDate = new Date(userProfile.subscriptionEndDate!);
+          setMessage(
+            `Your premium subscription will end on ${endDate.toLocaleDateString()}. You can renew it in the profile page.`
+          );
+        } else {
+          setMessage("Welcome back! You're on a premium plan.");
+        }
+      } else if (userProfile.subscriptionStatus === "canceled") {
+        setMessage(
+          "Your subscription has ended. Visit the profile page to resubscribe and enjoy premium features!"
+        );
+      } else {
+        setMessage(
+          "Welcome! Consider upgrading to our premium plan for additional features."
+        );
+      }
+
+      // Navigate to dashboard
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Error logging in:", error);
@@ -173,10 +213,13 @@ const Login: React.FC = () => {
         </Typography>
       </Box>
       <Snackbar
-        open={!!error}
+        open={!!error || !!message}
         autoHideDuration={6000}
-        onClose={() => setError(null)}
-        message={error}
+        onClose={() => {
+          setError(null);
+          setMessage(null);
+        }}
+        message={error || message}
       />
     </Box>
   );

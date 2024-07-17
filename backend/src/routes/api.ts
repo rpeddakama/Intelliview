@@ -467,6 +467,9 @@ router.get("/profile", async (req: Request, res: Response) => {
         ? appConfig.limits.premiumUser.chatMessages
         : appConfig.limits.freeUser.chatMessages,
       isPremium: userProfile.isPremium,
+      subscriptionStatus: userProfile.subscriptionStatus,
+      subscriptionEndDate: userProfile.subscriptionEndDate,
+      cancelAtPeriodEnd: userProfile.cancelAtPeriodEnd,
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);

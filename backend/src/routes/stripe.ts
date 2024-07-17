@@ -48,12 +48,7 @@ router.post(
   "/stripe-webhook",
   express.raw({ type: "application/json" }),
   async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-
-    if (typeof sig !== "string") {
-      return res.status(400).send("Invalid stripe signature");
-    }
-
+    const sig = req.headers["stripe-signature"] as string;
     let event: Stripe.Event;
 
     try {
@@ -62,13 +57,9 @@ router.post(
         sig,
         process.env.STRIPE_WEBHOOK_SECRET!
       );
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      console.error("Webhook Error:", errorMessage);
-      return res.status(400).send(`Webhook Error: ${errorMessage}`);
+    } catch (err: any) {
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-
-    console.log("Received event:", event.type);
 
     switch (event.type) {
       case "customer.subscription.created":
@@ -86,38 +77,41 @@ router.post(
 );
 
 async function handleSubscriptionChange(subscription: Stripe.Subscription) {
-  try {
-    const customer = await stripe.customers.retrieve(
-      subscription.customer as string
-    );
-    if ("deleted" in customer) {
-      console.log("Customer has been deleted");
-      return;
-    }
+  const customerData = await stripe.customers.retrieve(
+    subscription.customer as string
+  );
 
-    const isPremium =
-      subscription.status === "active" || subscription.status === "trialing";
-
-    console.log(
-      `Updating user status for email ${customer.email} to premium: ${isPremium}`
-    );
-
-    const updatedUser = await User.findOneAndUpdate(
-      { email: customer.email },
-      { $set: { isPremium: isPremium } },
-      { new: true }
-    );
-
-    if (updatedUser) {
-      console.log(
-        `Updated user ${updatedUser.email} premium status to ${isPremium}`
-      );
-    } else {
-      console.log(`No user found with email: ${customer.email}`);
-    }
-  } catch (error) {
-    console.error("Error updating user premium status:", error);
+  if (customerData.deleted) {
+    console.log(`Customer has been deleted: ${subscription.customer}`);
+    return;
   }
+
+  const customer = customerData as Stripe.Customer;
+  const user = await User.findOne({ email: customer.email });
+
+  if (!user) {
+    console.log(`No user found with email: ${customer.email}`);
+    return;
+  }
+
+  user.isPremium =
+    subscription.status === "active" || subscription.status === "trialing";
+  user.subscriptionStatus = subscription.status;
+  user.subscriptionEndDate = new Date(subscription.current_period_end * 1000);
+  user.cancelAtPeriodEnd = subscription.cancel_at_period_end;
+
+  // Check if this is a renewal
+  if (
+    subscription.status === "active" &&
+    user.subscriptionEndDate > new Date()
+  ) {
+    console.log(`Subscription renewed for user ${user.email}`);
+  }
+
+  await user.save();
+  console.log(
+    `Updated subscription status for user ${user.email}. New end date: ${user.subscriptionEndDate}`
+  );
 }
 
 export default router;

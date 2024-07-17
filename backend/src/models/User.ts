@@ -10,6 +10,9 @@ export interface IUser extends Document {
   isPremium: boolean;
   isVerified: boolean;
   verificationToken: string | null;
+  subscriptionStatus: string;
+  subscriptionEndDate: Date | null;
+  cancelAtPeriodEnd: boolean;
 }
 
 const UserSchema: Schema = new Schema({
@@ -21,7 +24,9 @@ const UserSchema: Schema = new Schema({
   isPremium: { type: Boolean, default: false },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String, default: null },
+  subscriptionStatus: { type: String, default: "none" },
+  subscriptionEndDate: { type: Date, default: null },
+  cancelAtPeriodEnd: { type: Boolean, default: false },
 });
 
-const User = mongoose.model<IUser>("User", UserSchema);
-export default User;
+export default mongoose.model<IUser>("User", UserSchema);

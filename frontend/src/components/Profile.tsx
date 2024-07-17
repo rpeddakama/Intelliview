@@ -6,22 +6,27 @@ import {
   Button,
   Grid,
   Toolbar,
+  Chip,
 } from "@mui/material";
 import Sidebar from "./ui/Sidebar";
 import EmailIcon from "@mui/icons-material/Email";
 import StarIcon from "@mui/icons-material/Star";
 import MicIcon from "@mui/icons-material/Mic";
 import ChatIcon from "@mui/icons-material/Chat";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import axiosInstance from "../axiosConfig";
 
 interface UserProfile {
   email: string;
   accountTier: string;
   recordingsUsed: number;
-  recordingsLimit: number;
+  recordingsLimit: number | null;
   chatMessagesUsed: number;
-  chatMessagesLimit: number;
+  chatMessagesLimit: number | null;
   isPremium: boolean;
+  subscriptionStatus: string;
+  subscriptionEndDate: string | null;
+  cancelAtPeriodEnd: boolean;
 }
 
 const ProfilePage: React.FC = () => {
@@ -30,7 +35,7 @@ const ProfilePage: React.FC = () => {
 
   const fetchProfile = async () => {
     try {
-      var response = await axiosInstance.get("/api/profile");
+      const response = await axiosInstance.get("/api/profile");
       setProfile(response.data);
       setError(null);
     } catch (error) {
@@ -42,6 +47,21 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  const getSubscriptionStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "active":
+        return "success";
+      case "trialing":
+        return "info";
+      case "canceled":
+        return "error";
+      case "none":
+        return "default";
+      default:
+        return "default";
+    }
+  };
 
   return (
     <Box sx={{ display: "flex", height: "100vh", bgcolor: "#1E1E1E" }}>
@@ -95,6 +115,51 @@ const ProfilePage: React.FC = () => {
               </Grid>
             </Grid>
 
+            <Box mt={4} mb={6}>
+              <Typography variant="h6" color="#C3C3C3" gutterBottom>
+                Subscription Details
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <Box display="flex" alignItems="center">
+                    <Typography variant="body1" color="#C3C3C3" mr={2}>
+                      Status:
+                    </Typography>
+                    <Chip
+                      label={profile.subscriptionStatus || "None"}
+                      color={getSubscriptionStatusColor(
+                        profile.subscriptionStatus
+                      )}
+                      size="small"
+                      sx={{
+                        color: "white",
+                        bgcolor: (theme) =>
+                          profile.subscriptionStatus.toLowerCase() === "none"
+                            ? theme.palette.grey[700]
+                            : undefined,
+                      }}
+                    />
+                  </Box>
+                </Grid>
+                {profile.subscriptionEndDate && (
+                  <Grid item xs={12} sm={6}>
+                    <Box display="flex" alignItems="center">
+                      <CalendarTodayIcon sx={{ mr: 2, color: "#C3C3C3" }} />
+                      <Typography variant="body1" color="white">
+                        {profile.cancelAtPeriodEnd
+                          ? `Subscription ends on ${new Date(
+                              profile.subscriptionEndDate
+                            ).toLocaleDateString()}`
+                          : `Next billing date: ${new Date(
+                              profile.subscriptionEndDate
+                            ).toLocaleDateString()}`}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
+
             <Box mt={6}>
               <Box mb={5}>
                 <Box
@@ -120,9 +185,7 @@ const ProfilePage: React.FC = () => {
                   variant="determinate"
                   value={
                     (profile.recordingsUsed /
-                      (profile.recordingsLimit === null
-                        ? profile.recordingsUsed + 1
-                        : profile.recordingsLimit)) *
+                      (profile.recordingsLimit || profile.recordingsUsed + 1)) *
                     100
                   }
                   sx={{
@@ -160,9 +223,8 @@ const ProfilePage: React.FC = () => {
                   variant="determinate"
                   value={
                     (profile.chatMessagesUsed /
-                      (profile.chatMessagesLimit === null
-                        ? profile.chatMessagesUsed + 1
-                        : profile.chatMessagesLimit)) *
+                      (profile.chatMessagesLimit ||
+                        profile.chatMessagesUsed + 1)) *
                     100
                   }
                   sx={{
