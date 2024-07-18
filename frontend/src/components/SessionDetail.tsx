@@ -3,12 +3,15 @@ import { useParams } from "react-router-dom";
 import axiosInstance from "../axiosConfig";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import Sidebar from "./ui/Sidebar";
+import AudioPlayer from "./ui/AudioPlayer";
 
 interface SessionData {
   question: string;
   transcription: string;
   analysis: string;
   chatMessages: { user: string; text: string; timestamp: string }[];
+  audio: ArrayBuffer;
+  audioMime: string;
 }
 
 const SessionDetail: React.FC = () => {
@@ -20,9 +23,16 @@ const SessionDetail: React.FC = () => {
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
-        const response = await axiosInstance.get(`/api/sessions/${id}`);
-        console.log("Received session data:", response.data);
-        setSessionData(response.data);
+        const response = await axiosInstance.get(`/api/sessions/${id}`, {
+          responseType: "arraybuffer",
+        });
+        const audioArrayBuffer = response.data;
+        const jsonData = JSON.parse(response.headers["x-json-data"]);
+
+        setSessionData({
+          ...jsonData,
+          audio: audioArrayBuffer,
+        });
       } catch (err) {
         console.error("Error fetching session data:", err);
         setError("Failed to load session data");
@@ -65,6 +75,14 @@ const SessionDetail: React.FC = () => {
             <Typography variant="h4" gutterBottom>
               {sessionData.question}
             </Typography>
+
+            <Typography variant="h6" gutterBottom>
+              Audio Recording
+            </Typography>
+            <AudioPlayer
+              audioBuffer={sessionData.audio}
+              audioMime={sessionData.audioMime}
+            />
 
             <Typography variant="h6" gutterBottom>
               Transcription

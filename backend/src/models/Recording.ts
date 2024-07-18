@@ -5,6 +5,7 @@ export interface IRecording extends Document {
   transcription: string;
   analysis: string;
   date: Date;
+  audio: Buffer;
 }
 
 const RecordingSchema: Schema = new Schema({
@@ -12,6 +13,7 @@ const RecordingSchema: Schema = new Schema({
   transcription: { type: String, required: true },
   analysis: { type: String, required: true },
   date: { type: Date, default: Date.now },
+  audio: { type: Buffer, required: true },
 });
 
 const Recording = mongoose.model<IRecording>("Recording", RecordingSchema);

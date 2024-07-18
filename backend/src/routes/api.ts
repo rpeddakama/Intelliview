@@ -35,18 +35,28 @@ router.get("/sessions/:id", async (req: Request, res: Response) => {
     const recording = await Recording.findById(sessionId);
     const chatMessages = await ChatMessage.find({ recordingId: sessionId });
 
-    // console.log("Found chat messages:", chatMessages);
-
     if (!recording) {
       return res.status(404).json({ message: "Session not found" });
     }
 
-    res.json({
+    // Determine MIME type (you might need to store this information when saving the audio)
+    const mime = recording.audio[0] === 0xff ? "audio/mpeg" : "audio/wav";
+
+    const responseData = {
       question: recording.question,
       transcription: recording.transcription,
       analysis: recording.analysis,
       chatMessages: chatMessages[0]?.messages || [],
+      audioLength: recording.audio.length,
+      audioMime: mime,
+    };
+
+    res.writeHead(200, {
+      "Content-Type": "application/octet-stream",
+      "X-JSON-Data": JSON.stringify(responseData),
     });
+
+    res.end(recording.audio);
   } catch (error) {
     console.error("Error fetching session data:", error);
     res.status(500).json({ message: "Server error" });
@@ -311,6 +321,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       transcription: transcription.text,
       analysis: analysis,
       date: new Date(),
+      audio: req.file.buffer, // Save the audio buffer
     });
 
     await newRecording.save({ session });
