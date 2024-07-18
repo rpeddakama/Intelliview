@@ -64,7 +64,7 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", height: "100vh", bgcolor: "#1E1E1E" }}>
+    <Box sx={{ display: "flex", height: "100vh", bgcolor: "#0D0D1A" }}>
       <Sidebar />
       <Box
         component="main"
@@ -76,7 +76,7 @@ const ProfilePage: React.FC = () => {
         }}
       >
         <Toolbar />
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" gutterBottom fontFamily={"GT-Eesti-Medium"}>
           Profile
         </Typography>
         {error && (
@@ -89,9 +89,9 @@ const ProfilePage: React.FC = () => {
             <Grid container spacing={6}>
               <Grid item xs={12} sm={6}>
                 <Box display="flex" alignItems="center" mb={4}>
-                  <EmailIcon sx={{ mr: 2, color: "#C3C3C3", fontSize: 40 }} />
+                  <EmailIcon sx={{ mr: 2, color: "#9494AA", fontSize: 40 }} />
                   <Box>
-                    <Typography variant="h6" color="#C3C3C3">
+                    <Typography variant="h6" color="#9494AA">
                       Email
                     </Typography>
                     <Typography variant="h5" color="white">
@@ -102,9 +102,9 @@ const ProfilePage: React.FC = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Box display="flex" alignItems="center" mb={4}>
-                  <StarIcon sx={{ mr: 2, color: "#C3C3C3", fontSize: 40 }} />
+                  <StarIcon sx={{ mr: 2, color: "#9494AA", fontSize: 40 }} />
                   <Box>
-                    <Typography variant="h6" color="#C3C3C3">
+                    <Typography variant="h6" color="#9494AA">
                       Account Tier
                     </Typography>
                     <Typography variant="h5" color="white">
@@ -116,13 +116,13 @@ const ProfilePage: React.FC = () => {
             </Grid>
 
             <Box mt={4} mb={6}>
-              <Typography variant="h6" color="#C3C3C3" gutterBottom>
+              <Typography variant="h6" color="#9494AA" gutterBottom>
                 Subscription Details
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                   <Box display="flex" alignItems="center">
-                    <Typography variant="body1" color="#C3C3C3" mr={2}>
+                    <Typography variant="body1" color="white" mr={2}>
                       Status:
                     </Typography>
                     <Chip
@@ -169,8 +169,8 @@ const ProfilePage: React.FC = () => {
                   mb={2}
                 >
                   <Box display="flex" alignItems="center">
-                    <MicIcon sx={{ mr: 2, color: "#C3C3C3", fontSize: 40 }} />
-                    <Typography variant="h5" color="#C3C3C3">
+                    <MicIcon sx={{ mr: 2, color: "#9494AA", fontSize: 40 }} />
+                    <Typography variant="h5" color="#9494AA">
                       Recordings
                     </Typography>
                   </Box>
@@ -207,8 +207,8 @@ const ProfilePage: React.FC = () => {
                   mb={2}
                 >
                   <Box display="flex" alignItems="center">
-                    <ChatIcon sx={{ mr: 2, color: "#C3C3C3", fontSize: 40 }} />
-                    <Typography variant="h5" color="#C3C3C3">
+                    <ChatIcon sx={{ mr: 2, color: "#9494AA", fontSize: 40 }} />
+                    <Typography variant="h5" color="#9494AA">
                       Chat Messages
                     </Typography>
                   </Box>

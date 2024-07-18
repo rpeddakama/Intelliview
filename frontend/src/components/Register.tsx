@@ -64,7 +64,7 @@ const Register: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        backgroundColor: "#1E1E1E",
+        backgroundColor: "#0D0D1A",
       }}
     >
       <Box
@@ -73,7 +73,7 @@ const Register: React.FC = () => {
         sx={{
           width: "100%",
           maxWidth: "400px",
-          backgroundColor: "#2C2C2C",
+          backgroundColor: "#191925",
           borderRadius: "8px",
           padding: "32px",
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -101,12 +101,12 @@ const Register: React.FC = () => {
           sx={{
             marginBottom: "16px",
             "& .MuiFilledInput-root": {
-              backgroundColor: "#3A3A3A",
+              backgroundColor: "#20202C",
               "&:hover": {
-                backgroundColor: "#444444",
+                backgroundColor: "#20202C",
               },
               "&.Mui-focused": {
-                backgroundColor: "#3A3A3A",
+                backgroundColor: "#20202C",
               },
             },
             "& .MuiInputBase-input": {
@@ -130,12 +130,12 @@ const Register: React.FC = () => {
           sx={{
             marginBottom: "16px",
             "& .MuiFilledInput-root": {
-              backgroundColor: "#3A3A3A",
+              backgroundColor: "#20202C",
               "&:hover": {
-                backgroundColor: "#444444",
+                backgroundColor: "#20202C",
               },
               "&.Mui-focused": {
-                backgroundColor: "#3A3A3A",
+                backgroundColor: "#20202C",
               },
             },
             "& .MuiInputBase-input": {
@@ -159,12 +159,12 @@ const Register: React.FC = () => {
           sx={{
             marginBottom: "24px",
             "& .MuiFilledInput-root": {
-              backgroundColor: "#3A3A3A",
+              backgroundColor: "#20202C",
               "&:hover": {
-                backgroundColor: "#444444",
+                backgroundColor: "#20202C",
               },
               "&.Mui-focused": {
-                backgroundColor: "#3A3A3A",
+                backgroundColor: "#20202C",
               },
             },
             "& .MuiInputBase-input": {
@@ -185,7 +185,6 @@ const Register: React.FC = () => {
             backgroundColor: "#623BFB",
             color: "white",
             textTransform: "none",
-            fontWeight: "bold",
             "&:hover": {
               backgroundColor: "#623BFB",
             },

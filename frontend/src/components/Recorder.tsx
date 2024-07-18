@@ -148,7 +148,7 @@ const Recorder: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: "#1E1E1E",
+          bgcolor: "#0D0D1A",
           p: 3,
           color: "white",
           height: "100vh",
@@ -192,19 +192,19 @@ const Recorder: React.FC = () => {
               inputProps={{ maxLength: 300 }}
               InputProps={{
                 disableUnderline: true,
-                style: { color: "white" },
+                style: { color: "#9090AF" },
               }}
               sx={{
                 marginBottom: 2,
                 "& .MuiFilledInput-root": {
-                  backgroundColor: "#333",
-                  "&:hover": { backgroundColor: "#444" },
-                  "&.Mui-focused": { backgroundColor: "#333" },
-                  "&.Mui-disabled": { backgroundColor: "#2A2A2A" },
+                  backgroundColor: "#20202C",
+                  "&:hover": { backgroundColor: "#20202C" },
+                  "&.Mui-focused": { backgroundColor: "#20202C" },
+                  "&.Mui-disabled": { backgroundColor: "#20202C" },
                 },
                 "& .MuiInputBase-input": { color: "white" },
                 "& .MuiInputBase-input.Mui-disabled": {
-                  WebkitTextFillColor: "#CCCCCC",
+                  WebkitTextFillColor: "#9090AF",
                   opacity: 0.7,
                 },
               }}
@@ -235,14 +235,22 @@ const Recorder: React.FC = () => {
                 onChange={(e) => setQuestion(e.target.value)}
                 disabled={isSubmitted}
                 sx={{
+                  backgroundColor: "#20202C",
                   color: "white",
                   "& .MuiFilledInput-root": {
-                    backgroundColor: "#333",
-                    "&:hover": { backgroundColor: "#444" },
-                    "&.Mui-focused": { backgroundColor: "#333" },
+                    backgroundColor: "#20202C",
+                    "&:hover": { backgroundColor: "#20202C" },
+                    "&.Mui-focused": { backgroundColor: "#20202C" },
                   },
-                  "& .MuiSelect-icon": { color: "white" },
-                  "&.Mui-focused .MuiSelect-icon": { color: "#623BFB" },
+                  "& .MuiSelect-select": {
+                    backgroundColor: "#20202C",
+                  },
+                  "& .MuiSelect-icon": {
+                    color: "white",
+                  },
+                  "&.Mui-focused .MuiSelect-icon": {
+                    color: "white",
+                  },
                   "&.Mui-disabled": {
                     color: "white",
                     opacity: 0.7,
@@ -253,6 +261,12 @@ const Recorder: React.FC = () => {
                     opacity: 0.7,
                     "-webkit-text-fill-color": "white",
                   },
+                  "&.MuiInputBase-root": {
+                    backgroundColor: "#20202C",
+                  },
+                  "&.Mui-focused": {
+                    backgroundColor: "#20202C",
+                  },
                 }}
                 MenuProps={{
                   PaperProps: {
@@ -260,6 +274,7 @@ const Recorder: React.FC = () => {
                       maxHeight: 48 * 4.5 + 8,
                       width: "auto",
                       maxWidth: "600px",
+                      backgroundColor: "#20202C",
                     },
                   },
                   anchorOrigin: {
@@ -276,7 +291,21 @@ const Recorder: React.FC = () => {
                   <MenuItem
                     key={index}
                     value={q}
-                    sx={{ whiteSpace: "normal", wordBreak: "break-word" }}
+                    sx={{
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      color: "white",
+                      backgroundColor: "#20202C",
+                      "&:hover": {
+                        backgroundColor: "#323248",
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: "#323248",
+                        "&:hover": {
+                          backgroundColor: "#323248",
+                        },
+                      },
+                    }}
                   >
                     {q}
                   </MenuItem>

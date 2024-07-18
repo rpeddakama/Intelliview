@@ -215,7 +215,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
     <Box
       sx={{
         width: "100%",
-        bgcolor: "#1E1E1E",
+        bgcolor: "#20202C",
         p: 2,
         borderRadius: 2,
         position: "relative",
@@ -250,9 +250,9 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
         value={progress}
         sx={{
           height: 40,
-          backgroundColor: "#2c2c2c",
+          backgroundColor: "#2D2D39",
           "& .MuiLinearProgress-bar": {
-            backgroundColor: "#4c4c4c",
+            backgroundColor: "#623BFB",
           },
           mb: 2,
         }}
@@ -274,7 +274,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           <>
             <Button
               variant="contained"
-              style={{ backgroundColor: "#404040" }}
+              style={{ backgroundColor: "#2D2D39" }}
               startIcon={isPaused ? <PlayArrow /> : <Pause />}
               onClick={isPaused ? resumeRecording : pauseRecording}
               sx={{ flex: 1, mr: 1 }}

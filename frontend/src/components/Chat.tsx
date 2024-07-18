@@ -8,6 +8,7 @@ import {
   keyframes,
 } from "@mui/material";
 import axiosInstance from "../axiosConfig";
+import smallLogo from "../assets/images/small_logo.png";
 
 interface ChatProps {
   recordingId: string;
@@ -118,7 +119,7 @@ const Chat: React.FC<ChatProps> = ({
       sx={{
         width: "100%",
         maxWidth: "600px",
-        backgroundColor: "#1e1e1e",
+        backgroundColor: "#191925",
         padding: "20px",
         borderRadius: "8px",
         color: "#ffffff",
@@ -129,13 +130,12 @@ const Chat: React.FC<ChatProps> = ({
         variant="h6"
         sx={{ marginBottom: 2, display: "flex", alignItems: "center" }}
       >
-        <Box
-          component="span"
-          sx={{
+        <img
+          src={smallLogo}
+          alt="Intelliview Logo"
+          style={{
             width: "24px",
             height: "24px",
-            borderRadius: "50%",
-            background: "linear-gradient(45deg, #ff00ff, #00ffff)",
             marginRight: "10px",
           }}
         />
@@ -204,17 +204,18 @@ const Chat: React.FC<ChatProps> = ({
           disabled={isWaitingForResponse || chatLimitReached}
           sx={{
             "& .MuiOutlinedInput-root": {
-              color: "white",
-              backgroundColor: "#2a2a2a",
+              color: "#9090AF",
+              backgroundColor: "#242432",
               "& fieldset": {
-                borderColor: "#444",
+                borderColor: "#242432",
               },
               "&:hover fieldset": {
-                borderColor: "#666",
+                borderColor: "#242432",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#888",
+                borderColor: "#242432",
               },
+              "& .MuiInputBase-input": { color: "white" },
             },
           }}
         />
@@ -224,10 +225,10 @@ const Chat: React.FC<ChatProps> = ({
           disabled={isWaitingForResponse || chatLimitReached}
           sx={{
             marginLeft: "10px",
-            backgroundColor: "#2a2a2a",
-            color: "white",
+            backgroundColor: input.length === 0 ? "#242432" : "#6732FF",
+            color: input.length === 0 ? "#9090AF" : "white",
             "&:hover": {
-              backgroundColor: "#444",
+              backgroundColor: input.length === 0 ? "#242432" : "#6732FF",
             },
           }}
         >

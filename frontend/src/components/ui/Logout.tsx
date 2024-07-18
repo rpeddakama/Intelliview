@@ -24,21 +24,15 @@ const Logout: React.FC = () => {
   };
 
   return (
-    <Button
+    <span
       onClick={handleLogout}
-      disabled={isLoading}
-      variant="contained"
-      color="secondary"
-      sx={{
-        textTransform: "none",
-        backgroundColor: "#623BFB",
-        "&:hover": {
-          backgroundColor: "#623BFB",
-        },
+      style={{
+        cursor: "pointer",
+        color: "white",
       }}
     >
       {isLoading ? <CircularProgress size={24} color="inherit" /> : "Logout"}
-    </Button>
+    </span>
   );
 };
 

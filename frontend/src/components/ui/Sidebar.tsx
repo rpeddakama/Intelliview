@@ -85,7 +85,7 @@ const Sidebar: React.FC = () => {
         "& .MuiDrawer-paper": {
           width: drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: "#2E2E2E",
+          backgroundColor: "#191925",
           color: "white",
           overflowX: "hidden",
           overflowY: "auto",
@@ -126,7 +126,7 @@ const Sidebar: React.FC = () => {
                 key={item.text}
                 sx={{
                   "&:hover": {
-                    backgroundColor: "#444",
+                    backgroundColor: "#252530",
                     borderRadius: "10px",
                     "& .MuiListItemIcon-root": {
                       color: "white",

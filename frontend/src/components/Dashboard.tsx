@@ -66,7 +66,7 @@ const Dashboard: React.FC = () => {
   };
 
   const cardStyle = {
-    backgroundColor: "#333",
+    backgroundColor: "#20202C",
     cursor: "pointer",
     display: "flex",
     flexDirection: "column",
@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: "#1E1E1E",
+          bgcolor: "#0D0D1A",
           p: 3,
           color: "white",
           height: "100vh",
@@ -97,10 +97,14 @@ const Dashboard: React.FC = () => {
       >
         <Toolbar />
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom fontFamily={"GT-Eesti-Medium"}>
             Home
           </Typography>
-          <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            gutterBottom
+            sx={{ mb: 2, color: "#9494AA" }}
+          >
             Improve your interview skills with industry-specific questions and
             feedback. Or try your own!
           </Typography>
@@ -108,8 +112,10 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} sm={6} md={3}>
               <Card sx={cardStyle} onClick={() => handleCardClick(null)}>
                 <CardContent sx={{ textAlign: "center" }}>
-                  <Add sx={{ fontSize: 40, mb: 2 }} />
-                  <Typography variant="h6">Custom</Typography>
+                  <Add sx={{ fontSize: 30, mb: 2, color: "white" }} />
+                  <Typography fontSize={16} color="white">
+                    Custom
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -123,8 +129,10 @@ const Dashboard: React.FC = () => {
                       onClick={() => handleCardClick(industry)}
                     >
                       <CardContent sx={{ textAlign: "center" }}>
-                        <IconComponent sx={{ fontSize: 40, mb: 2 }} />
-                        <Typography variant="h6">
+                        <IconComponent
+                          sx={{ fontSize: 30, mb: 2, color: "white" }}
+                        />
+                        <Typography fontSize={16} sx={{ color: "white" }}>
                           {industry.charAt(0).toUpperCase() +
                             industry.slice(1).replace("_", " ")}
                         </Typography>
@@ -144,7 +152,7 @@ const Dashboard: React.FC = () => {
             textAlign: "center",
           }}
         >
-          <Typography variant="body2" sx={{ color: "gray" }}>
+          <Typography variant="body2" sx={{ color: "#9494AA" }}>
             Email rishi@intelliview.io for problems/suggestions
           </Typography>
         </Box>

@@ -91,7 +91,7 @@ const PastSessions: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: "#1E1E1E",
+          bgcolor: "#0D0D1A",
           p: 3,
           color: "white",
           height: "100vh",
@@ -109,7 +109,14 @@ const PastSessions: React.FC = () => {
               <ListItem
                 button
                 disableRipple
-                sx={{ bgcolor: "#333", mb: 1, borderRadius: 1 }}
+                sx={{
+                  bgcolor: "#20202C",
+                  mb: 1,
+                  borderRadius: 1,
+                  "&:hover": {
+                    bgcolor: "#434358",
+                  },
+                }}
                 onClick={() => handleSessionClick(recording._id)}
               >
                 <Grid container alignItems="center">
@@ -120,7 +127,7 @@ const PastSessions: React.FC = () => {
                     />
                   </Grid>
                   <Grid item>
-                    <Typography variant="body2" color="#C3C3C3" sx={{ mr: 2 }}>
+                    <Typography variant="body2" color="#9090AF" sx={{ mr: 2 }}>
                       {formatDate(recording.date)}
                     </Typography>
                   </Grid>

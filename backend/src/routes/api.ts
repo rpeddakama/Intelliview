@@ -55,7 +55,6 @@ router.get("/sessions/:id", async (req: Request, res: Response) => {
 
 router.post("/chat", async (req: Request, res: Response) => {
   // console.log("Received chat request with body:", req.body);
-
   const { recordingId, question, transcription, analysis, input } = req.body;
 
   if (!recordingId || !input) {
@@ -114,13 +113,14 @@ router.post("/chat", async (req: Request, res: Response) => {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
       },
       data: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: `You are an interview assistant. Here is what they responded to the 
-            question: ${question}: ${transcription} and here is what the ai thought of the 
-            response: ${analysis}. You should respond to additional questions to the best of your ability.`,
+            content: `You are responsible for answering user questions based on their interview feedback. They just answered the 
+            question: ${question} and responded with ${transcription}. The overall analysis was as follows:  ${analysis}. Please 
+            respond to any of their questions regarding their interview and provide valuable insights, feedback, and advice. 
+            Keep your responses in the range of 2-6 sentences.`,
           },
           ...chatMessage.messages.map((msg) => ({
             role: msg.user === "You" ? "user" : "assistant",
@@ -268,10 +268,13 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       throw new Error("Transcription text is empty");
     }
 
-    const analysisPrompt = `Analyze the following transcription of a response to the following ${industry} interview question:
-    ${req.body.question}. Assess the quality of the response, including the clarity, relevance, and completeness of the answer. If the 
-    industry isn't "general", make sure to have industry-specific analysis. Finally, make sure to end your response with 
-    "Feel free to ask me any clarifying questions!" Here is their answer:\n\n${transcription.text}.`;
+    const analysisPrompt = `You are responsible for providing in-depth feedback on an interview question response. The user is 
+    responding to the following ${industry} interview question: ${req.body.question} The user has responded with: ${transcription.text}. 
+    Assess the quality of the response talking about things like clarity, relevance, and completeness. Guide users in the direction 
+    of a full and correct response. Give feedback on what the user did well and what they could improve on. Write between 8 and 
+    10 sentences. Space out your response into small paragraphs and give a clear, concise response. Do not repeat anything I have 
+    told you. Simply provide the user with new feedback on their response. Finally, make sure to end your response with: "Feel 
+    free to ask me any clarifying questions!"`;
 
     const analysisConfig = {
       method: "post",
@@ -281,7 +284,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
       },
       data: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",

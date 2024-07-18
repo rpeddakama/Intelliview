@@ -41,7 +41,7 @@ const SessionDetail: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: "#1E1E1E",
+          bgcolor: "#0D0D1A",
           p: 3,
           color: "white",
           minHeight: "100vh",
