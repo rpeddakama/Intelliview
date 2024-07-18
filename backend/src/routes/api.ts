@@ -110,7 +110,7 @@ router.post("/chat", async (req: Request, res: Response) => {
       url: "https://api.openai.com/v1/chat/completions",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       data: JSON.stringify({
         model: "gpt-4o",
@@ -254,7 +254,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       url: "https://api.openai.com/v1/audio/transcriptions",
       headers: {
         ...transcriptionFormData.getHeaders(),
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       data: transcriptionFormData,
     };
@@ -281,7 +281,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       url: "https://api.openai.com/v1/chat/completions",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY2}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       data: JSON.stringify({
         model: "gpt-4o",
