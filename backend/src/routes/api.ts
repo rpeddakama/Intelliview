@@ -278,13 +278,16 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       throw new Error("Transcription text is empty");
     }
 
-    const analysisPrompt = `You are responsible for providing in-depth feedback on an interview question response. The user is 
-    responding to the following ${industry} interview question: ${req.body.question} The user has responded with: ${transcription.text}. 
-    Assess the quality of the response talking about things like clarity, relevance, and completeness. Guide users in the direction 
-    of a full and correct response. Give feedback on what the user did well and what they could improve on. Write between 8 and 
-    10 sentences. Space out your response into small paragraphs and give a clear, concise response. Do not repeat anything I have 
-    told you. Simply provide the user with new feedback on their response. Finally, make sure to end your response with: "Feel 
-    free to ask me any clarifying questions!"`;
+    const analysisPrompt = `You are responsible for providing in-depth feedback on an interview question response. 
+    The user is responding to the following ${industry} interview question: ${req.body.question}. \n The user has 
+    responded with: ${transcription.text}. \n Assess the quality of the response by talking about things like clarity, 
+    relevance, and completeness, and more aspects you think of. Guide users in the direction of a full and correct response. 
+    Give feedback on what the user did well and what they could improve on. Make sure to relate advice back to the specific 
+    industry and what recruiters in that industry look for. For example, if the industry is investment banking, make sure 
+    to talk about what investment banking recruiters look for in candidates. Write between 10 and 15 sentences. Space out 
+    your response into small paragraphs and give a clear, concise response. Do not repeat anything I have told you. Simply 
+    provide the user with new feedback on their response. Finally, make sure to end your response with: "Feel free to ask 
+    me any clarifying questions!"`;
 
     const analysisConfig = {
       method: "post",
