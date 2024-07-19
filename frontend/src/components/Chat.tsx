@@ -78,7 +78,7 @@ const Chat: React.FC<ChatProps> = ({
   const checkChatLimit = async () => {
     try {
       const response = await axiosInstance.get("/api/check-chat-limit");
-      console.log("Chat limit response:", response.data);
+      //console.log("Chat limit response:", response.data);
       setRemainingMessages(response.data.remainingMessages);
     } catch (error) {
       console.error("Error checking chat limit:", error);

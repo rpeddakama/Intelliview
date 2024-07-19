@@ -17,7 +17,9 @@ import User from "../models/User";
 import ChatMessage from "../models/ChatMessage";
 import appConfig from "../config/config";
 
-const upload = multer();
+const upload = multer({
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit
+});
 const router = Router();
 dotenv.config();
 
@@ -153,10 +155,10 @@ router.post("/chat", async (req: Request, res: Response) => {
 
     await chatMessage.save();
 
-    console.log("Sending chat response:", {
-      reply,
-      messages: chatMessage.messages,
-    });
+    // console.log("Sending chat response:", {
+    //   reply,
+    //   messages: chatMessage.messages,
+    // });
     res.json({
       reply,
       messages: chatMessage.messages,
@@ -202,10 +204,10 @@ router.post("/chat", async (req: Request, res: Response) => {
 });
 
 router.get("/chat/:recordingId", async (req: Request, res: Response) => {
-  console.log(
-    "Fetching chat messages for recordingId:",
-    req.params.recordingId
-  );
+  // console.log(
+  //   "Fetching chat messages for recordingId:",
+  //   req.params.recordingId
+  // );
   try {
     const chatMessage = await ChatMessage.findOne({
       recordingId: req.params.recordingId,
@@ -251,6 +253,8 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       return res.status(400).json({ error: "Invalid file type" });
     }
 
+    console.log("FILE SIZE and TYPE", req.file.size, req.file.mimetype);
+
     // Transcription Step
     const transcriptionFormData = new FormData();
     transcriptionFormData.append("file", req.file.buffer, {
@@ -272,7 +276,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
     console.log("Sending transcription request to OpenAI");
     const transcriptionResponse = await axios(transcriptionConfig);
     const transcription = transcriptionResponse.data;
-    console.log("Received transcription:", transcription);
+    //console.log("Received transcription:", transcription);
 
     if (!transcription.text) {
       throw new Error("Transcription text is empty");
@@ -312,7 +316,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
     console.log("Sending analysis request to OpenAI");
     const analysisResponse = await axios(analysisConfig);
     const analysis = analysisResponse.data.choices[0].message.content;
-    console.log("Received analysis:", analysis);
+    //console.log("Received analysis:", analysis);
 
     if (!analysis) {
       throw new Error("Analysis is empty");
@@ -348,7 +352,7 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
       transcription: transcription.text,
       analysis: analysis,
     };
-    console.log("Sending transcribe response:", JSON.stringify(responseData));
+    console.log("Sending transcribe response:");
     res.json(responseData);
     console.log("Response sent successfully");
   } catch (error) {
@@ -390,7 +394,7 @@ router.get("/recordings", async (req: Request, res: Response) => {
       console.log("User not found");
       return res.status(404).json({ message: "User not found" });
     }
-    console.log("Sending recordings:", userProfile.recordings);
+    //console.log("Sending recordings:", userProfile.recordings);
     res.json(userProfile.recordings);
   } catch (error) {
     console.error("Error fetching recordings:", error);

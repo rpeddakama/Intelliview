@@ -136,7 +136,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
   console.log("Entering verifyEmail function");
   try {
     const { token } = req.query;
-    console.log("Verification token received:", token);
+    console.log("Verification token received");
 
     if (!token || typeof token !== "string") {
       console.log("Invalid token format");
