@@ -65,7 +65,7 @@ const Sidebar: React.FC = () => {
       );
 
       if (response.data.stripeCustomerId) {
-        const stripeUrl = new URL("https://buy.stripe.com/fZedTGavldEAeRibIJ");
+        const stripeUrl = new URL("https://buy.stripe.com/9AQcPC0UL440aB25km");
         if (profile && profile.email) {
           stripeUrl.searchParams.append("prefilled_email", profile.email);
         }
