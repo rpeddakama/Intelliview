@@ -498,4 +498,50 @@ router.get("/profile", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/generate-questions", async (req: Request, res: Response) => {
+  try {
+    const { jobDescription } = req.body;
+
+    if (!jobDescription) {
+      return res.status(400).json({ error: "Job description is required" });
+    }
+
+    const prompt = `Generate 5 interview questions based on the following job description: ${jobDescription}. The questions should be relevant to the company, industry, and role described.`;
+
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are an expert in creating relevant interview questions.",
+          },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 500,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    const generatedQuestions = response.data.choices[0].message.content
+      .split("\n")
+      .filter((question: string) => question.trim() !== "")
+      .map((question: string) => question.replace(/^\d+\.\s*/, "").trim());
+
+    res.json({ questions: generatedQuestions });
+  } catch (error) {
+    console.error("Error generating questions:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while generating questions" });
+  }
+});
+
 export default router;

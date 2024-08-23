@@ -15,6 +15,7 @@ import SignUpForm from "./components/helloworld";
 import { CssBaseline } from "@mui/material";
 import NotFound from "./components/NotFound";
 import EmailVerification from "./components/EmailVerification";
+import QuestionGenerator from "./components/QuestionGenerator";
 
 const App: React.FC = () => {
   return (
@@ -41,6 +42,7 @@ const App: React.FC = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="recorder" element={<Recorder />} />
             <Route path="past-sessions" element={<PastSessions />} />
+            <Route path="question-generator" element={<QuestionGenerator />} />
             <Route path="/session/:id" element={<SessionDetail />} />
           </Route>
         </Routes>
