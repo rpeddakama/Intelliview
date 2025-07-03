@@ -14,7 +14,7 @@ Practice interview questions with real-time AI feedback on your recorded respons
 ## 🛠️ Technologies
 
 **Frontend:** React, TypeScript <br>
-**Backend:** Node.js, Express, MongoDB, TypeScript <br>
+**Backend:** Node.js, Express, MongoDB, TypeScript, Deployed on AWS EC2 instance <br>
 **AI & Audio:** OpenAI API, Google Cloud Speech-to-Text <br>
 **Payment:** Stripe integration <br>
 **Authentication:** JWT with email verification (Resend API)
